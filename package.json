@@ -5,13 +5,13 @@
   "dependencies": {
     "@create-figma-plugin/ui": "^2.2.0",
     "@create-figma-plugin/utilities": "^2.2.0",
-    "preact": ">=10"
+    "preact": ">=10",
+    "unstated-next": "^1.1.0"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "^2.2.0",
     "@create-figma-plugin/tsconfig": "^2.2.0",
     "@figma/plugin-typings": "1.57.1",
-    "typescript": ">=4",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
     "eslint": "^8.6.0",
@@ -21,7 +21,8 @@
     "eslint-plugin-react": "^7.28.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.5",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "typescript": ">=4"
   },
   "license": "MIT",
   "figma-plugin": {

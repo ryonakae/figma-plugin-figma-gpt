@@ -1,5 +1,5 @@
 import { h, JSX } from 'preact'
-import { useRef, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 
 import {
   Button,
@@ -11,13 +11,13 @@ import {
   Textbox,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
-import { saveSettingsAsync } from '@create-figma-plugin/utilities'
+import { emit } from '@create-figma-plugin/utilities'
 
-import { SETTINGS_KEY } from '@/constants'
-import { Settings } from '@/types'
+import { NotifyHandler, SaveSettingsHandler } from '@/types'
+import Store from '@/ui/Store'
 
 export default function Setting() {
-  const [apiKey, setApiKey] = useState('')
+  const { apiKey, setApiKey } = Store.useContainer()
   const apiKeyRef = useRef('')
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
@@ -27,13 +27,18 @@ export default function Setting() {
   }
 
   function onSaveClick() {
-    saveSettingsAsync<Settings>(
-      {
-        apiKey: apiKeyRef.current,
-      },
-      SETTINGS_KEY
-    )
+    console.log(apiKeyRef.current)
+    emit<SaveSettingsHandler>('SAVE_SETTINGS', {
+      apiKey: apiKeyRef.current,
+    })
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Setting Saved.',
+    })
   }
+
+  useEffect(() => {
+    apiKeyRef.current = apiKey
+  }, [apiKey])
 
   return (
     <Container space="medium">
