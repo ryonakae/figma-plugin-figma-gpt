@@ -26,7 +26,7 @@
         ],
         "pathGroups": [
           {
-            "pattern": "{next,next/**}",
+            "pattern": "{preact,preact/**}",
             "group": "builtin",
             "position": "before"
           },

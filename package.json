@@ -30,8 +30,15 @@
     ],
     "id": "figma-gpt",
     "name": "Figma GPT",
-    "main": "src/main.ts",
-    "ui": "src/ui.tsx"
+    "main": "src/main/index.ts",
+    "ui": "src/ui/index.tsx",
+    "relaunchButtons": {
+      "open": {
+        "name": "Open Figma GPT",
+        "main": "src/main/index.ts",
+        "ui": "src/ui/index.tsx"
+      }
+    }
   },
   "lint-staged": {
     "*.(js|ts)?(x)": [
