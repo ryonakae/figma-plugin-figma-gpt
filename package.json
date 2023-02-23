@@ -1,0 +1,50 @@
+{
+  "name": "figma-plugin-figma-gpt",
+  "version": "1.0.0",
+  "author": "Ryo Nakae",
+  "dependencies": {
+    "@create-figma-plugin/ui": "^2.2.0",
+    "@create-figma-plugin/utilities": "^2.2.0",
+    "preact": ">=10"
+  },
+  "devDependencies": {
+    "@create-figma-plugin/build": "^2.2.0",
+    "@create-figma-plugin/tsconfig": "^2.2.0",
+    "@figma/plugin-typings": "1.57.1",
+    "typescript": ">=4",
+    "@typescript-eslint/eslint-plugin": "^5.9.0",
+    "@typescript-eslint/parser": "^5.9.0",
+    "eslint": "^8.6.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-import-resolver-typescript": "^2.5.0",
+    "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-react": "^7.28.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.1.5",
+    "prettier": "^2.5.1"
+  },
+  "license": "MIT",
+  "figma-plugin": {
+    "editorType": [
+      "figma"
+    ],
+    "id": "figma-gpt",
+    "name": "Figma GPT",
+    "main": "src/main.ts",
+    "ui": "src/ui.tsx"
+  },
+  "lint-staged": {
+    "*.(js|ts)?(x)": [
+      "bash -c 'yarn typecheck'",
+      "bash -c 'yarn lint-fix'"
+    ]
+  },
+  "scripts": {
+    "build": "build-figma-plugin --typecheck --minify",
+    "lint-fix": "yarn lint:prettier --write && yarn lint:eslint --fix",
+    "lint:eslint": "eslint --ext .ts,.tsx . --ignore-path .gitignore",
+    "lint:prettier": "prettier --check . --ignore-path .gitignore",
+    "typecheck": "tsc --noEmit",
+    "watch": "build-figma-plugin --typecheck --watch"
+  }
+}
