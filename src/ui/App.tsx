@@ -6,6 +6,7 @@ import { emit, once } from '@create-figma-plugin/utilities'
 
 import { UI_HEIGHT, UI_WIDTH } from '@/constants'
 import { ResizeWindowHandler, LoadSettingsHandler, Settings } from '@/types'
+import Chat from '@/ui/Chat'
 import Setting from '@/ui/Setting'
 import Store from '@/ui/Store'
 
@@ -15,9 +16,9 @@ export default function App() {
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   const tabOptions = [
-    { children: <Setting />, value: 'Setting' },
-    { children: <div>Foo</div>, value: 'Chat' },
+    { children: <Chat />, value: 'Chat' },
     { children: <div>Bar</div>, value: 'Code' },
+    { children: <Setting />, value: 'Setting' },
   ]
 
   function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
