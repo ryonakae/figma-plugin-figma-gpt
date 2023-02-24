@@ -1,7 +1,23 @@
 import { EventHandler } from '@create-figma-plugin/utilities'
 
+export type Model =
+  | 'text-davinci-003'
+  | 'text-curie-001'
+  | 'text-babbage-001'
+  | 'text-ada-001'
+  | 'code-davinci-002'
+  | 'code-cushman-001'
+
 export type Settings = {
   apiKey: string
+  model: Model
+  temperature: number
+  maxTokens: number
+  stop: string | string[]
+  topP: number
+  frequencyPenalty: number
+  presencePenalty: number
+  bestOf: number
   chatPrompt: string
 }
 

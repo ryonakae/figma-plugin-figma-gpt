@@ -7,7 +7,12 @@ import {
   emit,
 } from '@create-figma-plugin/utilities'
 
-import { SETTINGS_KEY, UI_HEIGHT, UI_WIDTH } from '@/constants'
+import {
+  DEFAULT_SETTINGS,
+  SETTINGS_KEY,
+  UI_HEIGHT,
+  UI_WIDTH,
+} from '@/constants'
 import {
   LoadSettingsHandler,
   NotifyHandler,
@@ -28,6 +33,14 @@ export default async function () {
     await saveSettingsAsync<Settings>(
       {
         apiKey: settings.apiKey,
+        model: settings.model,
+        temperature: settings.temperature,
+        maxTokens: settings.maxTokens,
+        stop: settings.stop,
+        topP: settings.topP,
+        frequencyPenalty: settings.frequencyPenalty,
+        presencePenalty: settings.presencePenalty,
+        bestOf: settings.bestOf,
         chatPrompt: settings.chatPrompt,
       },
       SETTINGS_KEY
@@ -50,10 +63,7 @@ export default async function () {
 
   // load settings from clientStorage
   const settings = await loadSettingsAsync<Settings>(
-    {
-      apiKey: '',
-      chatPrompt: '',
-    },
+    DEFAULT_SETTINGS,
     SETTINGS_KEY
   )
   emit<LoadSettingsHandler>('LOAD_SETTINGS', settings)
