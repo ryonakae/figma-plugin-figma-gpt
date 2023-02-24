@@ -18,12 +18,32 @@ import Store from '@/ui/Store'
 
 const tabOptions = [
   { children: <Chat />, value: 'Chat' },
-  { children: <div>Bar</div>, value: 'Code' },
   { children: <Setting />, value: 'Setting' },
 ]
 
 export default function App() {
-  const { apiKey, chatPrompt, setApiKey, setChatPrompt } = Store.useContainer()
+  const {
+    apiKey,
+    model,
+    temperature,
+    maxTokens,
+    stop,
+    topP,
+    frequencyPenalty,
+    presencePenalty,
+    bestOf,
+    chatPrompt,
+    setApiKey,
+    setModel,
+    setTemperature,
+    setMaxTokens,
+    setStop,
+    setTopP,
+    setFrequencyPenalty,
+    setPresencePenalty,
+    setBestOf,
+    setChatPrompt,
+  } = Store.useContainer()
   const [tabValue, setTabValue] = useState<null | string>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -51,6 +71,14 @@ export default function App() {
     console.log('saveSettings', settings)
     emit<SaveSettingsHandler>('SAVE_SETTINGS', {
       apiKey: settings.apiKey,
+      model: settings.model,
+      temperature: settings.temperature,
+      maxTokens: settings.maxTokens,
+      stop: settings.stop,
+      topP: settings.topP,
+      frequencyPenalty: settings.frequencyPenalty,
+      presencePenalty: settings.presencePenalty,
+      bestOf: settings.bestOf,
       chatPrompt: settings.chatPrompt,
     })
   }
@@ -58,6 +86,14 @@ export default function App() {
   function loadSettings(settings: Settings) {
     console.log('loadSettings', settings)
     setApiKey(settings.apiKey)
+    setModel(settings.model)
+    setTemperature(settings.temperature)
+    setMaxTokens(settings.maxTokens)
+    setStop(settings.stop)
+    setTopP(settings.topP)
+    setFrequencyPenalty(settings.frequencyPenalty)
+    setPresencePenalty(settings.presencePenalty)
+    setBestOf(settings.bestOf)
     setChatPrompt(settings.chatPrompt)
   }
 
@@ -74,8 +110,30 @@ export default function App() {
   }, [tabValue])
 
   useUpdateEffect(() => {
-    saveSettings({ apiKey, chatPrompt })
-  }, [apiKey, chatPrompt])
+    saveSettings({
+      apiKey,
+      model,
+      temperature,
+      maxTokens,
+      stop,
+      topP,
+      frequencyPenalty,
+      presencePenalty,
+      bestOf,
+      chatPrompt,
+    })
+  }, [
+    apiKey,
+    model,
+    temperature,
+    maxTokens,
+    stop,
+    topP,
+    frequencyPenalty,
+    presencePenalty,
+    bestOf,
+    chatPrompt,
+  ])
 
   return (
     <div ref={wrapperRef}>

@@ -91,7 +91,7 @@ export default function Setting() {
         Submit
       </Button>
 
-      <VerticalSpace space="medium" />
+      <VerticalSpace space="large" />
 
       {/* response */}
       <Text>
