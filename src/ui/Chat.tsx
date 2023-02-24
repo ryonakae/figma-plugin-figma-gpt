@@ -1,5 +1,4 @@
 import { h, JSX } from 'preact'
-import { useEffect, useRef } from 'preact/hooks'
 
 import {
   Button,
@@ -7,9 +6,7 @@ import {
   TextboxMultiline,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
-import { emit } from '@create-figma-plugin/utilities'
 
-import { NotifyHandler, SaveSettingsHandler } from '@/types'
 import Store from '@/ui/Store'
 
 export default function Setting() {

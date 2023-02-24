@@ -28,6 +28,7 @@ export default async function () {
     await saveSettingsAsync<Settings>(
       {
         apiKey: settings.apiKey,
+        chatPrompt: settings.chatPrompt,
       },
       SETTINGS_KEY
     )
@@ -51,6 +52,7 @@ export default async function () {
   const settings = await loadSettingsAsync<Settings>(
     {
       apiKey: '',
+      chatPrompt: '',
     },
     SETTINGS_KEY
   )
