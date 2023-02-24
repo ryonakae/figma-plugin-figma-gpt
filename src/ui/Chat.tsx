@@ -1,23 +1,39 @@
 import { h, JSX } from 'preact'
+import { useState } from 'preact/hooks'
 
 import {
   Button,
   Container,
+  Muted,
+  Text,
   TextboxMultiline,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
+import { emit } from '@create-figma-plugin/utilities'
+import { useCopyToClipboard } from 'react-use'
 
+import { NotifyHandler } from '@/types'
 import Store from '@/ui/Store'
 
 export default function Setting() {
   const { apiKey, chatPrompt, setChatPrompt } = Store.useContainer()
+  const [loading, setLoading] = useState(false)
+  const [chatResponse, setChatResponse] = useState('')
+  const [_, copyToClipboard] = useCopyToClipboard()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
     setChatPrompt(newValue)
   }
 
+  function onResponseInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
+    const newValue = event.currentTarget.value
+    setChatResponse(newValue)
+  }
+
   async function onSubmitClick() {
+    setLoading(true)
+
     const response = await fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
       headers: {
@@ -38,24 +54,65 @@ export default function Setting() {
     const data = await response.json()
     console.log(data)
 
-    setChatPrompt(chatPrompt + '\n\n' + data.choices[0].text.trim())
+    setChatResponse(data.choices[0].text.trim())
+    setLoading(false)
+  }
+
+  function onCopyClick() {
+    copyToClipboard(chatResponse)
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Copied to clipboard.',
+    })
   }
 
   return (
     <Container space="medium">
       <VerticalSpace space="medium" />
 
+      {/* prompt */}
+      <Text>
+        <Muted>Prompt</Muted>
+      </Text>
+      <VerticalSpace space="extraSmall" />
       <TextboxMultiline
         variant="border"
-        onInput={onPromptInput}
         value={chatPrompt}
-        rows={10}
+        onInput={onPromptInput}
+        placeholder="Write a tagline for an ice cream shop."
+        rows={5}
       />
-
-      <VerticalSpace space="extraLarge" />
-
-      <Button fullWidth onClick={onSubmitClick}>
+      <VerticalSpace space="extraSmall" />
+      <Button
+        fullWidth
+        onClick={onSubmitClick}
+        loading={loading}
+        disabled={loading}
+      >
         Submit
+      </Button>
+
+      <VerticalSpace space="medium" />
+
+      {/* response */}
+      <Text>
+        <Muted>Response</Muted>
+      </Text>
+      <VerticalSpace space="extraSmall" />
+      <TextboxMultiline
+        variant="border"
+        value={chatResponse}
+        onInput={onResponseInput}
+        rows={10}
+        disabled={loading}
+      />
+      <VerticalSpace space="extraSmall" />
+      <Button
+        fullWidth
+        secondary
+        disabled={loading || chatResponse.length === 0}
+        onClick={onCopyClick}
+      >
+        Copy to clipboard
       </Button>
 
       <VerticalSpace space="medium" />

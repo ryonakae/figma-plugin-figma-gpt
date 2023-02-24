@@ -26,21 +26,24 @@ export default function Setting() {
 
       <Columns>
         <Text>
-          <Muted>OpenAI API Key</Muted>
+          <Muted>OpenAI API key</Muted>
         </Text>
         <Text align="right">
           <Link
             href="https://platform.openai.com/account/api-keys"
             target="_blank"
           >
-            Get API Key
+            Get API key
           </Link>
         </Text>
       </Columns>
-      <VerticalSpace space="small" />
-      <Textbox variant="border" value={apiKey} onInput={onApiKeyInput} />
-
-      <VerticalSpace space="extraLarge" />
+      <VerticalSpace space="extraSmall" />
+      <Textbox
+        variant="border"
+        value={apiKey}
+        onInput={onApiKeyInput}
+        password
+      />
 
       <VerticalSpace space="medium" />
     </Container>
