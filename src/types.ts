@@ -2,6 +2,7 @@ import { EventHandler } from '@create-figma-plugin/utilities'
 
 export type Settings = {
   apiKey: string
+  chatPrompt: string
 }
 
 export interface LoadSettingsHandler extends EventHandler {
