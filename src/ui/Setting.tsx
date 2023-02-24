@@ -13,6 +13,7 @@ import {
   TextboxNumeric,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
+import cx from 'classnames'
 
 import { Model } from '@/types'
 import Store from '@/ui/Store'
@@ -65,7 +66,7 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* api key */}
-      <div className={`${styles.flex} ${styles.spaceBetween}`}>
+      <div className={cx(styles.flex, styles.spaceBetween)}>
         <Text>
           <Muted>OpenAI API key</Muted>
         </Text>
