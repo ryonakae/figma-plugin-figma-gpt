@@ -1,7 +1,6 @@
 import { h, JSX } from 'preact'
 
 import {
-  Columns,
   Container,
   Dropdown,
   DropdownOption,
@@ -66,7 +65,7 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* api key */}
-      <div className={cx(styles.flex, styles.spaceBetween)}>
+      <div className={styles.parameterTitle}>
         <Text>
           <Muted>OpenAI API key</Muted>
         </Text>
@@ -111,12 +110,14 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* temperature */}
-      <Columns>
+      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
         <Text>
           <Muted>Temperature</Muted>
         </Text>
-        <TextboxNumeric value={String(temperature)} />
-      </Columns>
+        <div className={styles.parameterTitleInput}>
+          <TextboxNumeric value={String(temperature)} />
+        </div>
+      </div>
       <RangeSlider
         increment={0.01}
         maximum={1}

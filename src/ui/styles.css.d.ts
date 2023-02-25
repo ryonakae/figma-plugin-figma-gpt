@@ -1,5 +1,6 @@
 declare const styles: {
-  readonly flex: string
-  readonly spaceBetween: string
+  readonly parameterTitle: string
+  readonly withRangeSlider: string
+  readonly parameterTitleInput: string
 }
 export = styles
