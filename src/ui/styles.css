@@ -1,7 +1,17 @@
-.flex {
+.parameterTitle {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.spaceBetween {
-  justify-content: space-between;
+.parameterTitle.withRangeSlider {
+  margin-bottom: -5px;
+}
+
+.parameterTitleInput {
+  width: 50px;
+}
+
+.parameterTitleInput input {
+  text-align: right;
 }
