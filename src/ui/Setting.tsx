@@ -60,6 +60,20 @@ export default function Setting() {
     setModel(event.currentTarget.value as Model)
   }
 
+  function getMaximumLength(model: Model) {
+    let length: number
+
+    if (model === 'text-davinci-003') {
+      length = 4000
+    } else if (model === 'code-davinci-002') {
+      length = 8000
+    } else {
+      length = 2048
+    }
+
+    return length
+  }
+
   return (
     <Container space="medium">
       <VerticalSpace space="medium" />
@@ -107,7 +121,7 @@ export default function Setting() {
         variant="border"
       />
 
-      <VerticalSpace space="medium" />
+      <VerticalSpace space="extraSmall" />
 
       {/* temperature */}
       <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
@@ -123,6 +137,81 @@ export default function Setting() {
         maximum={1}
         minimum={0}
         value={String(temperature)}
+      />
+
+      {/* maximum length */}
+      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+        <Text>
+          <Muted>Maximum length</Muted>
+        </Text>
+        <div className={styles.parameterTitleInput}>
+          <TextboxNumeric value={String(maxTokens)} />
+        </div>
+      </div>
+      <RangeSlider
+        increment={1}
+        maximum={getMaximumLength(model)}
+        minimum={0}
+        value={String(maxTokens)}
+      />
+
+      <VerticalSpace space="extraSmall" />
+
+      {/* stop sequences */}
+      <Text>
+        <Muted>Stop sequences</Muted>
+      </Text>
+      <VerticalSpace space="extraSmall" />
+      <Textbox variant="border" value={stop} />
+
+      <VerticalSpace space="extraSmall" />
+
+      {/* frequency penalty */}
+      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+        <Text>
+          <Muted>Frequency penalty</Muted>
+        </Text>
+        <div className={styles.parameterTitleInput}>
+          <TextboxNumeric value={String(frequencyPenalty)} />
+        </div>
+      </div>
+      <RangeSlider
+        increment={0.01}
+        maximum={2}
+        minimum={0}
+        value={String(frequencyPenalty)}
+      />
+
+      {/* presence penalty */}
+      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+        <Text>
+          <Muted>Presence penalty</Muted>
+        </Text>
+        <div className={styles.parameterTitleInput}>
+          <TextboxNumeric value={String(presencePenalty)} />
+        </div>
+      </div>
+      <RangeSlider
+        increment={0.01}
+        maximum={2}
+        minimum={0}
+        value={String(presencePenalty)}
+      />
+
+      {/* best of */}
+      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+        <Text>
+          <Muted>Best of</Muted>
+        </Text>
+        <div className={styles.parameterTitleInput}>
+          <TextboxNumeric value={String(bestOf)} />
+        </div>
+      </div>
+      <RangeSlider
+        increment={1}
+        maximum={20}
+        minimum={0}
+        value={String(bestOf)}
       />
 
       <VerticalSpace space="medium" />

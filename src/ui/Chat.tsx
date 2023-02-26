@@ -79,7 +79,7 @@ export default function Setting() {
         value={chatPrompt}
         onInput={onPromptInput}
         placeholder="Write a tagline for an ice cream shop."
-        rows={5}
+        rows={10}
       />
       <VerticalSpace space="extraSmall" />
       <Button

@@ -13,7 +13,7 @@ export type Settings = {
   model: Model
   temperature: number
   maxTokens: number
-  stop: string | string[]
+  stop: string
   topP: number
   frequencyPenalty: number
   presencePenalty: number
