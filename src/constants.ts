@@ -18,4 +18,5 @@ export const DEFAULT_SETTINGS: Settings = {
   chatPrompt: '',
   codePrompt: '',
   codeResponse: '',
+  codePromptSpecialize: false,
 }

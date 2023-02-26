@@ -21,6 +21,7 @@ export type Settings = {
   chatPrompt: string
   codePrompt: string
   codeResponse: string
+  codePromptSpecialize: boolean
 }
 
 export interface LoadSettingsHandler extends EventHandler {

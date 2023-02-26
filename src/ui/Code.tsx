@@ -7,6 +7,7 @@ import {
   Muted,
   Text,
   TextboxMultiline,
+  Toggle,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
@@ -23,17 +24,31 @@ export default function Main() {
   const [_, copyToClipboard] = useCopyToClipboard()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
-    const newValue = event.currentTarget.value
-    setSettings({ ...settings, codePrompt: newValue })
+    setSettings({ ...settings, codePrompt: event.currentTarget.value })
+  }
+
+  function onSpecializedChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    setSettings({
+      ...settings,
+      codePromptSpecialize: event.currentTarget.checked,
+    })
   }
 
   function onResponseInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
-    const newValue = event.currentTarget.value
-    setSettings({ ...settings, codeResponse: newValue })
+    setSettings({ ...settings, codeResponse: event.currentTarget.value })
   }
 
   async function onSubmitClick() {
     setLoading(true)
+
+    let prompt: string
+    if (settings.codePromptSpecialize) {
+      prompt = `Please generate the following content code in JavaScript.
+"${settings.codePrompt}".
+For code generation, please refer to Figma Plugin API (https://www.figma.com/plugin-docs/api/figma).`
+    } else {
+      prompt = settings.codePrompt
+    }
 
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
@@ -50,7 +65,7 @@ export default function Main() {
         frequency_penalty: settings.frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
         presence_penalty: settings.presencePenalty, // 単語の再利用 min:-2.0 max:2.0
         best_of: settings.bestOf,
-        prompt: settings.codePrompt,
+        prompt: prompt,
       }),
     })
       .then(async response => {
@@ -114,6 +129,13 @@ export default function Main() {
         placeholder="/* Create a JavaScript dictionary of 5 countries and capitals: */"
         rows={10}
       />
+      <VerticalSpace space="extraSmall" />
+      <Toggle
+        value={settings.codePromptSpecialize}
+        onChange={onSpecializedChange}
+      >
+        <Text>Specialize in generating code for Figma Plugin API</Text>
+      </Toggle>
       <VerticalSpace space="extraSmall" />
       <Button
         fullWidth
