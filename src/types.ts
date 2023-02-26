@@ -42,6 +42,11 @@ export interface NotifyHandler extends EventHandler {
   handler: (options: { message: string; options?: NotificationOptions }) => void
 }
 
+export interface ExecHandler extends EventHandler {
+  name: 'EXEC'
+  handler: (code: string) => void
+}
+
 export type OpenAiApiError = {
   error: {
     message: string

@@ -18,6 +18,15 @@
   height: 100%;
 }
 
+.responseButtons {
+  display: flex;
+  gap: var(--space-extra-small);
+}
+
+.responseButtons > * {
+  flex: 1;
+}
+
 .setting {
   flex: 1;
 }

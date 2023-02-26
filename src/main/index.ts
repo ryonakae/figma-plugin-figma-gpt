@@ -14,6 +14,7 @@ import {
   UI_WIDTH,
 } from '@/constants'
 import {
+  ExecHandler,
   LoadSettingsHandler,
   NotifyHandler,
   ResizeWindowHandler,
@@ -61,6 +62,10 @@ export default async function () {
       figma.notify(options.message, options.options)
     }
   )
+
+  on<ExecHandler>('EXEC', function (code: string) {
+    eval(code)
+  })
 
   // load settings from clientStorage
   const settings = await loadSettingsAsync<Settings>(
