@@ -19,7 +19,8 @@ export type Settings = {
   presencePenalty: number
   bestOf: number
   chatPrompt: string
-  chatResponse: string
+  codePrompt: string
+  codeResponse: string
 }
 
 export interface LoadSettingsHandler extends EventHandler {

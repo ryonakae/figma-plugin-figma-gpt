@@ -1,7 +1,7 @@
-import { h } from 'preact'
-import { useRef } from 'preact/hooks'
+import { h, JSX } from 'preact'
+import { useRef, useState } from 'preact/hooks'
 
-import { Container } from '@create-figma-plugin/ui'
+import { Tabs, TabsOption } from '@create-figma-plugin/ui'
 import { emit, once } from '@create-figma-plugin/utilities'
 import { useMount, useUpdateEffect } from 'react-use'
 
@@ -12,37 +12,20 @@ import {
   Settings,
   SaveSettingsHandler,
 } from '@/types'
-import Main from '@/ui/Main'
+import Chat from '@/ui/Chat'
+import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
 import Store from '@/ui/Store'
 
-import styles from './styles.css'
+const tabOptions: Array<TabsOption> = [
+  { children: <Chat />, value: 'Chat' },
+  { children: <Code />, value: 'Code' },
+  { children: <Setting />, value: 'Setting' },
+]
 
 export default function App() {
-  const {
-    apiKey,
-    model,
-    temperature,
-    maxTokens,
-    stop,
-    topP,
-    frequencyPenalty,
-    presencePenalty,
-    bestOf,
-    chatPrompt,
-    chatResponse,
-    setApiKey,
-    setModel,
-    setTemperature,
-    setMaxTokens,
-    setStop,
-    setTopP,
-    setFrequencyPenalty,
-    setPresencePenalty,
-    setBestOf,
-    setChatPrompt,
-    setChatResponse,
-  } = Store.useContainer()
+  const { settings, setSettings } = Store.useContainer()
+  const [tabValue, setTabValue] = useState<string | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
   function resizeWindow() {
@@ -67,20 +50,15 @@ export default function App() {
 
   function loadSettings(settings: Settings) {
     console.log('loadSettings', settings)
-    setApiKey(settings.apiKey)
-    setModel(settings.model)
-    setTemperature(settings.temperature)
-    setMaxTokens(settings.maxTokens)
-    setStop(settings.stop)
-    setTopP(settings.topP)
-    setFrequencyPenalty(settings.frequencyPenalty)
-    setPresencePenalty(settings.presencePenalty)
-    setBestOf(settings.bestOf)
-    setChatPrompt(settings.chatPrompt)
-    setChatResponse(settings.chatResponse)
+    setSettings(settings)
+  }
+
+  function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    setTabValue(event.currentTarget.value)
   }
 
   useMount(() => {
+    setTabValue(tabOptions[0].value)
     resizeWindow()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
@@ -88,41 +66,16 @@ export default function App() {
   })
 
   useUpdateEffect(() => {
-    saveSettings({
-      apiKey,
-      model,
-      temperature,
-      maxTokens,
-      stop,
-      topP,
-      frequencyPenalty,
-      presencePenalty,
-      bestOf,
-      chatPrompt,
-      chatResponse,
-    })
-  }, [
-    apiKey,
-    model,
-    temperature,
-    maxTokens,
-    stop,
-    topP,
-    frequencyPenalty,
-    presencePenalty,
-    bestOf,
-    chatPrompt,
-    chatResponse,
-  ])
+    saveSettings(settings)
+  }, [settings])
+
+  useUpdateEffect(() => {
+    resizeWindow()
+  }, [tabValue])
 
   return (
     <div ref={wrapperRef}>
-      <Container space="medium">
-        <div className={styles.columns}>
-          <Main className={styles.main} />
-          <Setting className={styles.setting} />
-        </div>
-      </Container>
+      <Tabs onChange={onTabChange} options={tabOptions} value={tabValue} />
     </div>
   )
 }

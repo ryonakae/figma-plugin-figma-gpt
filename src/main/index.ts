@@ -31,22 +31,7 @@ export default async function () {
   })
 
   on<SaveSettingsHandler>('SAVE_SETTINGS', async function (settings: Settings) {
-    await saveSettingsAsync<Settings>(
-      {
-        apiKey: settings.apiKey,
-        model: settings.model,
-        temperature: settings.temperature,
-        maxTokens: settings.maxTokens,
-        stop: settings.stop,
-        topP: settings.topP,
-        frequencyPenalty: settings.frequencyPenalty,
-        presencePenalty: settings.presencePenalty,
-        bestOf: settings.bestOf,
-        chatPrompt: settings.chatPrompt,
-        chatResponse: settings.chatResponse,
-      },
-      SETTINGS_KEY
-    )
+    await saveSettingsAsync<Settings>(settings, SETTINGS_KEY)
   })
 
   on<ResizeWindowHandler>(
