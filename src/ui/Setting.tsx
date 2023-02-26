@@ -1,7 +1,8 @@
-import { ComponentProps, h, JSX } from 'preact'
+import { h, JSX } from 'preact'
 
 import {
   Button,
+  Container,
   Dropdown,
   DropdownOption,
   Link,
@@ -31,66 +32,54 @@ const modelOptions: Array<DropdownOption<Model>> = [
   { value: 'code-cushman-001' },
 ]
 
-type SettingProps = ComponentProps<'div'>
-
-export default function Setting(props: SettingProps) {
-  const {
-    apiKey,
-    model,
-    temperature,
-    maxTokens,
-    stop,
-    topP,
-    frequencyPenalty,
-    presencePenalty,
-    bestOf,
-    setApiKey,
-    setModel,
-    setTemperature,
-    setMaxTokens,
-    setStop,
-    setTopP,
-    setFrequencyPenalty,
-    setPresencePenalty,
-    setBestOf,
-  } = Store.useContainer()
+export default function Setting() {
+  const { settings, setSettings } = Store.useContainer()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setApiKey(event.currentTarget.value)
+    setSettings({ ...settings, apiKey: event.currentTarget.value })
   }
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setModel(event.currentTarget.value as Model)
+    setSettings({ ...settings, model: event.currentTarget.value as Model })
   }
 
   function onTemperatureChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setTemperature(Number(event.currentTarget.value))
+    setSettings({ ...settings, temperature: Number(event.currentTarget.value) })
   }
 
   function onMaxTokensChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setMaxTokens(Number(event.currentTarget.value))
+    setSettings({ ...settings, maxTokens: Number(event.currentTarget.value) })
   }
 
   function onStopInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setStop(event.currentTarget.value)
+    setSettings({ ...settings, stop: event.currentTarget.value })
   }
 
   function onTopPChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setTopP(Number(event.currentTarget.value))
+    setSettings({ ...settings, topP: Number(event.currentTarget.value) })
   }
 
   function onFrequencyPenaltyChange(
     event: JSX.TargetedEvent<HTMLInputElement>
   ) {
-    setFrequencyPenalty(Number(event.currentTarget.value))
+    setSettings({
+      ...settings,
+      frequencyPenalty: Number(event.currentTarget.value),
+    })
   }
 
   function onPresencePenaltyChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setPresencePenalty(Number(event.currentTarget.value))
+    setSettings({
+      ...settings,
+      presencePenalty: Number(event.currentTarget.value),
+    })
   }
 
   function onBestOfChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setBestOf(Number(event.currentTarget.value))
+    setSettings({
+      ...settings,
+      bestOf: Number(event.currentTarget.value),
+    })
   }
 
   function getMaximumLength(model: Model) {
@@ -108,13 +97,17 @@ export default function Setting(props: SettingProps) {
   }
 
   function onResetClick() {
-    setModel(DEFAULT_SETTINGS.model)
-    setTemperature(DEFAULT_SETTINGS.temperature)
-    setMaxTokens(DEFAULT_SETTINGS.maxTokens)
-    setStop(DEFAULT_SETTINGS.stop)
-    setFrequencyPenalty(DEFAULT_SETTINGS.frequencyPenalty)
-    setPresencePenalty(DEFAULT_SETTINGS.presencePenalty)
-    setBestOf(DEFAULT_SETTINGS.bestOf)
+    setSettings({
+      ...settings,
+      model: DEFAULT_SETTINGS.model,
+      temperature: DEFAULT_SETTINGS.temperature,
+      maxTokens: DEFAULT_SETTINGS.maxTokens,
+      stop: DEFAULT_SETTINGS.stop,
+      topP: DEFAULT_SETTINGS.topP,
+      frequencyPenalty: DEFAULT_SETTINGS.frequencyPenalty,
+      presencePenalty: DEFAULT_SETTINGS.presencePenalty,
+      bestOf: DEFAULT_SETTINGS.bestOf,
+    })
 
     emit<NotifyHandler>('NOTIFY', {
       message: 'Parameters reset.',
@@ -123,23 +116,23 @@ export default function Setting(props: SettingProps) {
 
   // update maxTokens on model & maxTokens change
   useUpdateEffect(() => {
-    if (model === 'code-davinci-002') {
-      if (maxTokens > 8000) {
-        setMaxTokens(8000)
+    if (settings.model === 'code-davinci-002') {
+      if (settings.maxTokens > 8000) {
+        setSettings({ ...settings, maxTokens: 8000 })
       }
-    } else if (model === 'text-davinci-003') {
-      if (maxTokens > 4000) {
-        setMaxTokens(4000)
+    } else if (settings.model === 'text-davinci-003') {
+      if (settings.maxTokens > 4000) {
+        setSettings({ ...settings, maxTokens: 4000 })
       }
     } else {
-      if (maxTokens > 2048) {
-        setMaxTokens(2048)
+      if (settings.maxTokens > 2048) {
+        setSettings({ ...settings, maxTokens: 2048 })
       }
     }
-  }, [model, maxTokens])
+  }, [settings.model, settings.maxTokens])
 
   return (
-    <div {...props}>
+    <Container space="medium">
       <VerticalSpace space="medium" />
 
       {/* api key */}
@@ -159,7 +152,7 @@ export default function Setting(props: SettingProps) {
       <VerticalSpace space="extraSmall" />
       <Textbox
         variant="border"
-        value={apiKey}
+        value={settings.apiKey}
         onInput={onApiKeyInput}
         password
       />
@@ -191,7 +184,7 @@ export default function Setting(props: SettingProps) {
       <Dropdown
         onChange={onModelChange}
         options={modelOptions}
-        value={model}
+        value={settings.model || null}
         variant="border"
       />
 
@@ -204,7 +197,7 @@ export default function Setting(props: SettingProps) {
         </Text>
         <div className={styles.parameterTitleInput}>
           <TextboxNumeric
-            value={String(temperature)}
+            value={String(settings.temperature)}
             onInput={onTemperatureChange}
           />
         </div>
@@ -213,7 +206,7 @@ export default function Setting(props: SettingProps) {
         increment={0.01}
         maximum={1}
         minimum={0}
-        value={String(temperature)}
+        value={String(settings.temperature)}
         onChange={onTemperatureChange}
       />
 
@@ -224,16 +217,16 @@ export default function Setting(props: SettingProps) {
         </Text>
         <div className={styles.parameterTitleInput}>
           <TextboxNumeric
-            value={String(maxTokens)}
+            value={String(settings.maxTokens)}
             onInput={onMaxTokensChange}
           />
         </div>
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaximumLength(model)}
+        maximum={getMaximumLength(settings.model)}
         minimum={0}
-        value={String(maxTokens)}
+        value={String(settings.maxTokens)}
         onChange={onMaxTokensChange}
       />
 
@@ -244,7 +237,7 @@ export default function Setting(props: SettingProps) {
         <Muted>Stop sequences</Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
-      <Textbox variant="border" value={stop} onInput={onStopInput} />
+      <Textbox variant="border" value={settings.stop} onInput={onStopInput} />
 
       <VerticalSpace space="extraSmall" />
 
@@ -254,14 +247,17 @@ export default function Setting(props: SettingProps) {
           <Muted>Top P</Muted>
         </Text>
         <div className={styles.parameterTitleInput}>
-          <TextboxNumeric value={String(topP)} onInput={onTopPChange} />
+          <TextboxNumeric
+            value={String(settings.topP)}
+            onInput={onTopPChange}
+          />
         </div>
       </div>
       <RangeSlider
         increment={0.01}
         maximum={1}
         minimum={0}
-        value={String(topP)}
+        value={String(settings.topP)}
         onChange={onTopPChange}
       />
 
@@ -272,7 +268,7 @@ export default function Setting(props: SettingProps) {
         </Text>
         <div className={styles.parameterTitleInput}>
           <TextboxNumeric
-            value={String(frequencyPenalty)}
+            value={String(settings.frequencyPenalty)}
             onInput={onFrequencyPenaltyChange}
           />
         </div>
@@ -281,7 +277,7 @@ export default function Setting(props: SettingProps) {
         increment={0.01}
         maximum={2}
         minimum={0}
-        value={String(frequencyPenalty)}
+        value={String(settings.frequencyPenalty)}
         onChange={onFrequencyPenaltyChange}
       />
 
@@ -292,7 +288,7 @@ export default function Setting(props: SettingProps) {
         </Text>
         <div className={styles.parameterTitleInput}>
           <TextboxNumeric
-            value={String(presencePenalty)}
+            value={String(settings.presencePenalty)}
             onInput={onPresencePenaltyChange}
           />
         </div>
@@ -301,7 +297,7 @@ export default function Setting(props: SettingProps) {
         increment={0.01}
         maximum={2}
         minimum={0}
-        value={String(presencePenalty)}
+        value={String(settings.presencePenalty)}
         onChange={onPresencePenaltyChange}
       />
 
@@ -311,14 +307,17 @@ export default function Setting(props: SettingProps) {
           <Muted>Best of</Muted>
         </Text>
         <div className={styles.parameterTitleInput}>
-          <TextboxNumeric value={String(bestOf)} onInput={onBestOfChange} />
+          <TextboxNumeric
+            value={String(settings.bestOf)}
+            onInput={onBestOfChange}
+          />
         </div>
       </div>
       <RangeSlider
         increment={1}
         maximum={20}
         minimum={0}
-        value={String(bestOf)}
+        value={String(settings.bestOf)}
         onChange={onBestOfChange}
       />
 
@@ -330,6 +329,6 @@ export default function Setting(props: SettingProps) {
       </Button>
 
       <VerticalSpace space="medium" />
-    </div>
+    </Container>
   )
 }

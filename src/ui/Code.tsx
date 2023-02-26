@@ -1,9 +1,9 @@
-import { ComponentProps, h, JSX } from 'preact'
+import { h, JSX } from 'preact'
 import { useState } from 'preact/hooks'
 
 import {
   Button,
-  Columns,
+  Container,
   Muted,
   Text,
   TextboxMultiline,
@@ -17,35 +17,19 @@ import Store from '@/ui/Store'
 
 import styles from './styles.css'
 
-type MainProps = ComponentProps<'div'>
-
-export default function Main(props: MainProps) {
-  const {
-    apiKey,
-    model,
-    temperature,
-    maxTokens,
-    stop,
-    topP,
-    frequencyPenalty,
-    presencePenalty,
-    bestOf,
-    chatPrompt,
-    chatResponse,
-    setChatPrompt,
-    setChatResponse,
-  } = Store.useContainer()
+export default function Main() {
+  const { settings, setSettings } = Store.useContainer()
   const [loading, setLoading] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
-    setChatPrompt(newValue)
+    setSettings({ ...settings, codePrompt: newValue })
   }
 
   function onResponseInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
-    setChatResponse(newValue)
+    setSettings({ ...settings, codeResponse: newValue })
   }
 
   async function onSubmitClick() {
@@ -55,18 +39,18 @@ export default function Main(props: MainProps) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: model,
-        temperature: temperature, // 単語のランダム性 min:0.1 max:2.0
-        max_tokens: maxTokens, // 出力される文章量の最大値（トークン数） max:4096
-        stop: stop, // 途中で生成を停止する単語
-        top_p: topP, // 単語のランダム性 min:-2.0 max:2.0
-        frequency_penalty: frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
-        presence_penalty: presencePenalty, // 単語の再利用 min:-2.0 max:2.0
-        best_of: bestOf,
-        prompt: chatPrompt,
+        model: settings.model,
+        temperature: settings.temperature, // 単語のランダム性 min:0.1 max:2.0
+        max_tokens: settings.maxTokens, // 出力される文章量の最大値（トークン数） max:4096
+        stop: settings.stop, // 途中で生成を停止する単語
+        top_p: settings.topP, // 単語のランダム性 min:-2.0 max:2.0
+        frequency_penalty: settings.frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
+        presence_penalty: settings.presencePenalty, // 単語の再利用 min:-2.0 max:2.0
+        best_of: settings.bestOf,
+        prompt: settings.codePrompt,
       }),
     })
       .then(async response => {
@@ -81,7 +65,7 @@ export default function Main(props: MainProps) {
         // 成功時の処理
         const data = await response.json()
         console.log(data)
-        setChatResponse(data.choices[0].text.trim())
+        setSettings({ ...settings, codeResponse: data.choices[0].text.trim() })
         emit<NotifyHandler>('NOTIFY', {
           message: 'Response returned.',
         })
@@ -101,21 +85,21 @@ export default function Main(props: MainProps) {
   }
 
   function onCopyClick() {
-    copyToClipboard(chatResponse)
+    copyToClipboard(settings.codeResponse)
     emit<NotifyHandler>('NOTIFY', {
       message: 'Copied to clipboard.',
     })
   }
 
   function onExecClick() {
-    emit<ExecHandler>('EXEC', chatResponse)
+    emit<ExecHandler>('EXEC', settings.codeResponse)
     emit<NotifyHandler>('NOTIFY', {
       message: 'Code has been executed.',
     })
   }
 
   return (
-    <div {...props}>
+    <Container space="medium">
       <VerticalSpace space="medium" />
 
       {/* prompt */}
@@ -125,13 +109,9 @@ export default function Main(props: MainProps) {
       <VerticalSpace space="extraSmall" />
       <TextboxMultiline
         variant="border"
-        value={chatPrompt}
+        value={settings.codePrompt}
         onInput={onPromptInput}
-        placeholder={
-          model === 'code-cushman-001' || model === 'code-davinci-002'
-            ? '/* Create a JavaScript dictionary of 5 countries and capitals: */'
-            : 'Write a tagline for an ice cream shop.'
-        }
+        placeholder="/* Create a JavaScript dictionary of 5 countries and capitals: */"
         rows={10}
       />
       <VerticalSpace space="extraSmall" />
@@ -139,7 +119,11 @@ export default function Main(props: MainProps) {
         fullWidth
         onClick={onSubmitClick}
         loading={loading}
-        disabled={loading || chatPrompt.length === 0 || apiKey.length === 0}
+        disabled={
+          loading ||
+          settings.codePrompt.length === 0 ||
+          settings.apiKey.length === 0
+        }
       >
         Submit
       </Button>
@@ -151,18 +135,17 @@ export default function Main(props: MainProps) {
         <Muted>Response</Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
-      <div className={styles.responseTextBox}>
-        <TextboxMultiline
-          variant="border"
-          value={chatResponse}
-          onInput={onResponseInput}
-        />
-      </div>
+      <TextboxMultiline
+        variant="border"
+        value={settings.codeResponse}
+        onInput={onResponseInput}
+        rows={15}
+      />
       <VerticalSpace space="extraSmall" />
       <div className={styles.responseButtons}>
         <Button
           fullWidth
-          disabled={loading || chatResponse.length === 0}
+          disabled={loading || settings.codeResponse.length === 0}
           onClick={onExecClick}
         >
           Exec as code
@@ -170,7 +153,7 @@ export default function Main(props: MainProps) {
         <Button
           fullWidth
           secondary
-          disabled={loading || chatResponse.length === 0}
+          disabled={loading || settings.codeResponse.length === 0}
           onClick={onCopyClick}
         >
           Copy to clipboard
@@ -178,6 +161,6 @@ export default function Main(props: MainProps) {
       </div>
 
       <VerticalSpace space="medium" />
-    </div>
+    </Container>
   )
 }
