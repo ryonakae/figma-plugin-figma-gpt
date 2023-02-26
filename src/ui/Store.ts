@@ -30,6 +30,9 @@ function Store() {
   const [chatPrompt, setChatPrompt] = useState<Settings['chatPrompt']>(
     DEFAULT_SETTINGS.chatPrompt
   )
+  const [chatResponse, setChatResponse] = useState<Settings['chatResponse']>(
+    DEFAULT_SETTINGS.chatResponse
+  )
 
   return {
     apiKey,
@@ -42,6 +45,7 @@ function Store() {
     presencePenalty,
     bestOf,
     chatPrompt,
+    chatResponse,
     setApiKey,
     setModel,
     setTemperature,
@@ -52,6 +56,7 @@ function Store() {
     setPresencePenalty,
     setBestOf,
     setChatPrompt,
+    setChatResponse,
   }
 }
 

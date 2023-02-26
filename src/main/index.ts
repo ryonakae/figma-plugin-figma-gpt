@@ -42,6 +42,7 @@ export default async function () {
         presencePenalty: settings.presencePenalty,
         bestOf: settings.bestOf,
         chatPrompt: settings.chatPrompt,
+        chatResponse: settings.chatResponse,
       },
       SETTINGS_KEY
     )

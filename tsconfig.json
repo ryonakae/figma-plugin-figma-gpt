@@ -4,7 +4,9 @@
     "baseUrl": ".",
     "typeRoots": ["node_modules/@figma", "node_modules/@types"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "react": ["./node_modules/preact/compat/"],
+      "react-dom": ["./node_modules/preact/compat/"]
     },
     "skipLibCheck": true
   },
