@@ -1,3 +1,16 @@
+.columns {
+  display: flex;
+  gap: var(--space-medium);
+}
+
+.main {
+  width: 70%;
+}
+
+.setting {
+  flex: 1;
+}
+
 .parameterTitle {
   display: flex;
   justify-content: space-between;

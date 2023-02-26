@@ -2,7 +2,7 @@ import { Settings } from '@/types'
 
 export const SETTINGS_KEY = 'figma-gpt'
 
-export const UI_WIDTH = 400
+export const UI_WIDTH = 600
 export const UI_HEIGHT = 0
 
 export const DEFAULT_SETTINGS: Settings = {
