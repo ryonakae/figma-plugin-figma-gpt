@@ -1,4 +1,4 @@
-import { h, JSX } from 'preact'
+import { ComponentProps, h, JSX } from 'preact'
 import { useState } from 'preact/hooks'
 
 import {
@@ -15,7 +15,9 @@ import { useCopyToClipboard } from 'react-use'
 import { NotifyHandler } from '@/types'
 import Store from '@/ui/Store'
 
-export default function Setting() {
+type MainProps = ComponentProps<'div'>
+
+export default function Main(props: MainProps) {
   const { apiKey, chatPrompt, setChatPrompt } = Store.useContainer()
   const [loading, setLoading] = useState(false)
   const [chatResponse, setChatResponse] = useState('')
@@ -66,7 +68,7 @@ export default function Setting() {
   }
 
   return (
-    <Container space="medium">
+    <div {...props}>
       <VerticalSpace space="medium" />
 
       {/* prompt */}
@@ -86,7 +88,7 @@ export default function Setting() {
         fullWidth
         onClick={onSubmitClick}
         loading={loading}
-        disabled={loading}
+        disabled={loading || chatPrompt.length === 0}
       >
         Submit
       </Button>
@@ -102,7 +104,7 @@ export default function Setting() {
         variant="border"
         value={chatResponse}
         onInput={onResponseInput}
-        rows={10}
+        rows={15}
         disabled={loading}
       />
       <VerticalSpace space="extraSmall" />
@@ -116,6 +118,6 @@ export default function Setting() {
       </Button>
 
       <VerticalSpace space="medium" />
-    </Container>
+    </div>
   )
 }

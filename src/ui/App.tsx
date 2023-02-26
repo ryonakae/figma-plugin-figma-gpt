@@ -1,7 +1,7 @@
-import { h, JSX } from 'preact'
-import { useRef, useState } from 'preact/hooks'
+import { h } from 'preact'
+import { useRef } from 'preact/hooks'
 
-import { Tabs } from '@create-figma-plugin/ui'
+import { Container } from '@create-figma-plugin/ui'
 import { emit, once } from '@create-figma-plugin/utilities'
 import { useMount, useUpdateEffect } from 'react-use'
 
@@ -12,14 +12,11 @@ import {
   Settings,
   SaveSettingsHandler,
 } from '@/types'
-import Chat from '@/ui/Chat'
+import Main from '@/ui/Main'
 import Setting from '@/ui/Setting'
 import Store from '@/ui/Store'
 
-const tabOptions = [
-  { children: <Chat />, value: 'Chat' },
-  { children: <Setting />, value: 'Setting' },
-]
+import styles from './styles.css'
 
 export default function App() {
   const {
@@ -44,13 +41,7 @@ export default function App() {
     setBestOf,
     setChatPrompt,
   } = Store.useContainer()
-  const [tabValue, setTabValue] = useState<null | string>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
-
-  function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    const newValue = event.currentTarget.value
-    setTabValue(newValue)
-  }
 
   function resizeWindow() {
     let height: number
@@ -98,16 +89,11 @@ export default function App() {
   }
 
   useMount(() => {
-    setTabValue(tabOptions[0].value)
-
+    resizeWindow()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
     })
   })
-
-  useUpdateEffect(() => {
-    resizeWindow()
-  }, [tabValue])
 
   useUpdateEffect(() => {
     saveSettings({
@@ -137,7 +123,12 @@ export default function App() {
 
   return (
     <div ref={wrapperRef}>
-      <Tabs options={tabOptions} onChange={onTabChange} value={tabValue} />
+      <Container space="medium">
+        <div className={styles.columns}>
+          <Main className={styles.main} />
+          <Setting className={styles.setting} />
+        </div>
+      </Container>
     </div>
   )
 }

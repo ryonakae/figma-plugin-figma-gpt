@@ -1,4 +1,4 @@
-import { h, JSX } from 'preact'
+import { ComponentProps, h, JSX } from 'preact'
 
 import {
   Container,
@@ -28,7 +28,9 @@ const modelOptions: Array<DropdownOption<Model>> = [
   { value: 'code-cushman-001' },
 ]
 
-export default function Setting() {
+type SettingProps = ComponentProps<'div'>
+
+export default function Setting(props: SettingProps) {
   const {
     apiKey,
     model,
@@ -75,7 +77,7 @@ export default function Setting() {
   }
 
   return (
-    <Container space="medium">
+    <div {...props}>
       <VerticalSpace space="medium" />
 
       {/* api key */}
@@ -103,9 +105,19 @@ export default function Setting() {
       <VerticalSpace space="large" />
 
       {/* parameters title */}
-      <Text>
-        <Muted>Parameters</Muted>
-      </Text>
+      <div className={styles.parameterTitle}>
+        <Text>
+          <Muted>Parameters</Muted>
+        </Text>
+        <Text>
+          <Link
+            href="https://platform.openai.com/docs/api-reference/completions/create#completions/create-model"
+            target="_blank"
+          >
+            Documentation
+          </Link>
+        </Text>
+      </div>
 
       <VerticalSpace space="medium" />
 
@@ -215,6 +227,6 @@ export default function Setting() {
       />
 
       <VerticalSpace space="medium" />
-    </Container>
+    </div>
   )
 }
