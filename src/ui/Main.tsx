@@ -3,6 +3,7 @@ import { useState } from 'preact/hooks'
 
 import {
   Button,
+  Columns,
   Muted,
   Text,
   TextboxMultiline,
@@ -11,7 +12,7 @@ import {
 import { emit } from '@create-figma-plugin/utilities'
 import { useCopyToClipboard } from 'react-use'
 
-import { NotifyHandler, OpenAiApiError } from '@/types'
+import { ExecHandler, NotifyHandler, OpenAiApiError } from '@/types'
 import Store from '@/ui/Store'
 
 import styles from './styles.css'
@@ -77,10 +78,13 @@ export default function Main(props: MainProps) {
           throw new Error(data.error.message)
         }
 
+        // 成功時の処理
         const data = await response.json()
         console.log(data)
-
         setChatResponse(data.choices[0].text.trim())
+        emit<NotifyHandler>('NOTIFY', {
+          message: 'Response returned.',
+        })
       })
       .catch((err: Error) => {
         console.log('err', err.message)
@@ -100,6 +104,13 @@ export default function Main(props: MainProps) {
     copyToClipboard(chatResponse)
     emit<NotifyHandler>('NOTIFY', {
       message: 'Copied to clipboard.',
+    })
+  }
+
+  function onExecClick() {
+    emit<ExecHandler>('EXEC', chatResponse)
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Code has been executed.',
     })
   }
 
@@ -148,14 +159,23 @@ export default function Main(props: MainProps) {
         />
       </div>
       <VerticalSpace space="extraSmall" />
-      <Button
-        fullWidth
-        secondary
-        disabled={loading || chatResponse.length === 0}
-        onClick={onCopyClick}
-      >
-        Copy to clipboard
-      </Button>
+      <div className={styles.responseButtons}>
+        <Button
+          fullWidth
+          disabled={loading || chatResponse.length === 0}
+          onClick={onExecClick}
+        >
+          Exec as code
+        </Button>
+        <Button
+          fullWidth
+          secondary
+          disabled={loading || chatResponse.length === 0}
+          onClick={onCopyClick}
+        >
+          Copy to clipboard
+        </Button>
+      </div>
 
       <VerticalSpace space="medium" />
     </div>
