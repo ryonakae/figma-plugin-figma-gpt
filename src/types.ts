@@ -19,6 +19,7 @@ export type Settings = {
   presencePenalty: number
   bestOf: number
   chatPrompt: string
+  chatResponse: string
 }
 
 export interface LoadSettingsHandler extends EventHandler {
@@ -39,4 +40,13 @@ export interface ResizeWindowHandler extends EventHandler {
 export interface NotifyHandler extends EventHandler {
   name: 'NOTIFY'
   handler: (options: { message: string; options?: NotificationOptions }) => void
+}
+
+export type OpenAiApiError = {
+  error: {
+    message: string
+    type: string
+    // param?: string
+    // code?: string
+  }
 }

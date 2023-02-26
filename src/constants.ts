@@ -16,4 +16,5 @@ export const DEFAULT_SETTINGS: Settings = {
   presencePenalty: 0,
   bestOf: 1,
   chatPrompt: '',
+  chatResponse: '',
 }

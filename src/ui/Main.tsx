@@ -3,7 +3,6 @@ import { useState } from 'preact/hooks'
 
 import {
   Button,
-  Container,
   Muted,
   Text,
   TextboxMultiline,
@@ -12,15 +11,30 @@ import {
 import { emit } from '@create-figma-plugin/utilities'
 import { useCopyToClipboard } from 'react-use'
 
-import { NotifyHandler } from '@/types'
+import { NotifyHandler, OpenAiApiError } from '@/types'
 import Store from '@/ui/Store'
+
+import styles from './styles.css'
 
 type MainProps = ComponentProps<'div'>
 
 export default function Main(props: MainProps) {
-  const { apiKey, chatPrompt, setChatPrompt } = Store.useContainer()
+  const {
+    apiKey,
+    model,
+    temperature,
+    maxTokens,
+    stop,
+    topP,
+    frequencyPenalty,
+    presencePenalty,
+    bestOf,
+    chatPrompt,
+    chatResponse,
+    setChatPrompt,
+    setChatResponse,
+  } = Store.useContainer()
   const [loading, setLoading] = useState(false)
-  const [chatResponse, setChatResponse] = useState('')
   const [_, copyToClipboard] = useCopyToClipboard()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
@@ -36,28 +50,50 @@ export default function Main(props: MainProps) {
   async function onSubmitClick() {
     setLoading(true)
 
-    const response = await fetch('https://api.openai.com/v1/completions', {
+    fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'text-davinci-001',
+        model: model,
+        temperature: temperature, // 単語のランダム性 min:0.1 max:2.0
+        max_tokens: maxTokens, // 出力される文章量の最大値（トークン数） max:4096
+        stop: stop, // 途中で生成を停止する単語
+        top_p: topP, // 単語のランダム性 min:-2.0 max:2.0
+        frequency_penalty: frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
+        presence_penalty: presencePenalty, // 単語の再利用 min:-2.0 max:2.0
+        best_of: bestOf,
         prompt: chatPrompt,
-        max_tokens: 150, // 出力される文章量の最大値（トークン数） max:4096
-        temperature: 1, // 単語のランダム性 min:0.1 max:2.0
-        top_p: 1, // 単語のランダム性 min:-2.0 max:2.0
-        frequency_penalty: 0.0, // 単語の再利用 min:-2.0 max:2.0
-        presence_penalty: 0.6, // 単語の再利用 min:-2.0 max:2.0
-        stop: [' Human:', ' AI:'], // 途中で生成を停止する単語
       }),
     })
-    const data = await response.json()
-    console.log(data)
+      .then(async response => {
+        // エラーコードが返って来た場合、エラーを投げる（catchに書いている処理を実行）
+        if (!response.ok) {
+          console.error('response.ok:', response.ok)
+          console.error('response.status:', response.status)
+          const data = (await response.json()) as OpenAiApiError
+          throw new Error(data.error.message)
+        }
 
-    setChatResponse(data.choices[0].text.trim())
-    setLoading(false)
+        const data = await response.json()
+        console.log(data)
+
+        setChatResponse(data.choices[0].text.trim())
+      })
+      .catch((err: Error) => {
+        console.log('err', err.message)
+        emit<NotifyHandler>('NOTIFY', {
+          message: err.message,
+          options: {
+            error: true,
+          },
+        })
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   function onCopyClick() {
@@ -80,7 +116,11 @@ export default function Main(props: MainProps) {
         variant="border"
         value={chatPrompt}
         onInput={onPromptInput}
-        placeholder="Write a tagline for an ice cream shop."
+        placeholder={
+          model === 'code-cushman-001' || model === 'code-davinci-002'
+            ? '/* Create a JavaScript dictionary of 5 countries and capitals: */'
+            : 'Write a tagline for an ice cream shop.'
+        }
         rows={10}
       />
       <VerticalSpace space="extraSmall" />
@@ -88,7 +128,7 @@ export default function Main(props: MainProps) {
         fullWidth
         onClick={onSubmitClick}
         loading={loading}
-        disabled={loading || chatPrompt.length === 0}
+        disabled={loading || chatPrompt.length === 0 || apiKey.length === 0}
       >
         Submit
       </Button>
@@ -100,13 +140,13 @@ export default function Main(props: MainProps) {
         <Muted>Response</Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
-      <TextboxMultiline
-        variant="border"
-        value={chatResponse}
-        onInput={onResponseInput}
-        rows={15}
-        disabled={loading}
-      />
+      <div className={styles.responseTextBox}>
+        <TextboxMultiline
+          variant="border"
+          value={chatResponse}
+          onInput={onResponseInput}
+        />
+      </div>
       <VerticalSpace space="extraSmall" />
       <Button
         fullWidth

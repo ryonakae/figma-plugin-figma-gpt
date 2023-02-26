@@ -30,6 +30,7 @@ export default function App() {
     presencePenalty,
     bestOf,
     chatPrompt,
+    chatResponse,
     setApiKey,
     setModel,
     setTemperature,
@@ -40,6 +41,7 @@ export default function App() {
     setPresencePenalty,
     setBestOf,
     setChatPrompt,
+    setChatResponse,
   } = Store.useContainer()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -60,18 +62,7 @@ export default function App() {
 
   function saveSettings(settings: Settings) {
     console.log('saveSettings', settings)
-    emit<SaveSettingsHandler>('SAVE_SETTINGS', {
-      apiKey: settings.apiKey,
-      model: settings.model,
-      temperature: settings.temperature,
-      maxTokens: settings.maxTokens,
-      stop: settings.stop,
-      topP: settings.topP,
-      frequencyPenalty: settings.frequencyPenalty,
-      presencePenalty: settings.presencePenalty,
-      bestOf: settings.bestOf,
-      chatPrompt: settings.chatPrompt,
-    })
+    emit<SaveSettingsHandler>('SAVE_SETTINGS', settings)
   }
 
   function loadSettings(settings: Settings) {
@@ -86,6 +77,7 @@ export default function App() {
     setPresencePenalty(settings.presencePenalty)
     setBestOf(settings.bestOf)
     setChatPrompt(settings.chatPrompt)
+    setChatResponse(settings.chatResponse)
   }
 
   useMount(() => {
@@ -107,6 +99,7 @@ export default function App() {
       presencePenalty,
       bestOf,
       chatPrompt,
+      chatResponse,
     })
   }, [
     apiKey,
@@ -119,6 +112,7 @@ export default function App() {
     presencePenalty,
     bestOf,
     chatPrompt,
+    chatResponse,
   ])
 
   return (

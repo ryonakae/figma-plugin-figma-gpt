@@ -5,6 +5,17 @@
 
 .main {
   width: 70%;
+  display: flex;
+  flex-direction: column;
+}
+
+.responseTextBox {
+  flex: 1;
+  position: relative;
+}
+
+.responseTextBox textarea {
+  height: 100%;
 }
 
 .setting {
@@ -22,7 +33,7 @@
 }
 
 .parameterTitleInput {
-  width: 50px;
+  width: 45px;
 }
 
 .parameterTitleInput input {
