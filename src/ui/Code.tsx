@@ -42,9 +42,9 @@ export default function Main() {
 
     let prompt: string
     if (settings.codePromptSpecialize) {
-      prompt = `Please generate the following content code in JavaScript.
-"${settings.codePrompt}".
-For code generation, please refer to Figma Plugin API (https://www.figma.com/plugin-docs/api/figma).`
+      prompt = `Please generate code in JavaScript to execute the following content.
+      "${settings.codePrompt}".
+      To generate code, use the functions described in the Figma Plugin API documentation (https://www.figma.com/plugin-docs/api/figma).`
     } else {
       prompt = settings.codePrompt
     }
@@ -125,7 +125,7 @@ For code generation, please refer to Figma Plugin API (https://www.figma.com/plu
         variant="border"
         value={settings.codePrompt}
         onInput={onPromptInput}
-        placeholder="/* Create a JavaScript dictionary of 5 countries and capitals: */"
+        placeholder="Create a JavaScript dictionary of 5 countries and capitals."
         rows={5}
       />
       <VerticalSpace space="extraSmall" />
