@@ -11,12 +11,15 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
+import { css } from '@emotion/react'
+import { highlight, languages } from 'prismjs'
+import Editor from 'react-simple-code-editor'
 import { useCopyToClipboard } from 'react-use'
 
 import { ExecHandler, NotifyHandler, OpenAiApiError } from '@/types'
 import Store from '@/ui/Store'
 
-import styles from './styles.css'
+import '!prismjs/themes/prism.css'
 
 export default function Main() {
   const { settings, setSettings } = Store.useContainer()
@@ -32,10 +35,6 @@ export default function Main() {
       ...settings,
       codePromptSpecialize: event.currentTarget.checked,
     })
-  }
-
-  function onResponseInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
-    setSettings({ ...settings, codeResponse: event.currentTarget.value })
   }
 
   async function onSubmitClick() {
@@ -127,14 +126,14 @@ For code generation, please refer to Figma Plugin API (https://www.figma.com/plu
         value={settings.codePrompt}
         onInput={onPromptInput}
         placeholder="/* Create a JavaScript dictionary of 5 countries and capitals: */"
-        rows={10}
+        rows={5}
       />
       <VerticalSpace space="extraSmall" />
       <Toggle
         value={settings.codePromptSpecialize}
         onChange={onSpecializedChange}
       >
-        <Text>Specialize in generating code for Figma Plugin API</Text>
+        <Text>Mode for generating Figma Plugin API code</Text>
       </Toggle>
       <VerticalSpace space="extraSmall" />
       <Button
@@ -157,14 +156,60 @@ For code generation, please refer to Figma Plugin API (https://www.figma.com/plu
         <Muted>Response</Muted>
       </Text>
       <VerticalSpace space="extraSmall" />
-      <TextboxMultiline
-        variant="border"
-        value={settings.codeResponse}
-        onInput={onResponseInput}
-        rows={15}
-      />
+      <div
+        css={css`
+          font-family: var(--font-family-code);
+          font-size: var(--font-size-11);
+          height: 300px;
+          overflow: auto;
+          padding: 6px var(--space-extra-small) 6px var(--space-extra-small);
+          border: 1px solid var(--figma-color-border);
+          border-radius: var(--border-radius-2);
+          background-color: transparent;
+
+          .react-simple-code-editor__pre,
+          .react-simple-code-editor__textarea {
+            position: relative;
+            min-height: 100%;
+          }
+
+          .react-simple-code-editor__pre {
+            z-index: 2;
+
+            pre,
+            code {
+              white-space: pre-wrap !important;
+            }
+          }
+
+          .react-simple-code-editor__textarea {
+            z-index: 1;
+          }
+        `}
+      >
+        <Editor
+          value={settings.codeResponse}
+          onValueChange={(code: string) =>
+            setSettings({ ...settings, codeResponse: code })
+          }
+          highlight={(code: string) => highlight(code, languages.js, 'js')}
+          padding={0}
+          preClassName="react-simple-code-editor__pre"
+          textareaClassName="react-simple-code-editor__textarea"
+          spellcheck={false}
+        />
+      </div>
       <VerticalSpace space="extraSmall" />
-      <div className={styles.responseButtons}>
+      <div
+        css={css`
+          display: flex;
+          gap: var(--space-extra-small);
+
+          & > * {
+            flex: 1;
+          }
+        `}
+      >
         <Button
           fullWidth
           disabled={loading || settings.codeResponse.length === 0}

@@ -14,14 +14,11 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
-import cx from 'classnames'
 import { useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
 import { Model, NotifyHandler } from '@/types'
 import Store from '@/ui/Store'
-
-import styles from './styles.css'
 
 const modelOptions: Array<DropdownOption<Model>> = [
   { value: 'text-davinci-003' },
@@ -136,7 +133,7 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* api key */}
-      <div className={styles.parameterTitle}>
+      <div className="parameterTitle">
         <Text>
           <Muted>OpenAI API key</Muted>
         </Text>
@@ -160,7 +157,7 @@ export default function Setting() {
       <VerticalSpace space="large" />
 
       {/* parameters title */}
-      <div className={styles.parameterTitle}>
+      <div className="parameterTitle">
         <Text>
           <Muted>Parameters</Muted>
         </Text>
@@ -191,11 +188,11 @@ export default function Setting() {
       <VerticalSpace space="extraSmall" />
 
       {/* temperature */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Temperature</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.temperature)}
             onInput={onTemperatureChange}
@@ -211,11 +208,11 @@ export default function Setting() {
       />
 
       {/* maximum length */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Maximum length</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.maxTokens)}
             onInput={onMaxTokensChange}
@@ -242,11 +239,11 @@ export default function Setting() {
       <VerticalSpace space="extraSmall" />
 
       {/* top p */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Top P</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.topP)}
             onInput={onTopPChange}
@@ -262,11 +259,11 @@ export default function Setting() {
       />
 
       {/* frequency penalty */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Frequency penalty</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.frequencyPenalty)}
             onInput={onFrequencyPenaltyChange}
@@ -282,11 +279,11 @@ export default function Setting() {
       />
 
       {/* presence penalty */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Presence penalty</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.presencePenalty)}
             onInput={onPresencePenaltyChange}
@@ -302,11 +299,11 @@ export default function Setting() {
       />
 
       {/* best of */}
-      <div className={cx(styles.parameterTitle, styles.withRangeSlider)}>
+      <div className="parameterTitle withRangeSlider">
         <Text>
           <Muted>Best of</Muted>
         </Text>
-        <div className={styles.parameterTitleInput}>
+        <div className="parameterTitleInput">
           <TextboxNumeric
             value={String(settings.bestOf)}
             onInput={onBestOfChange}
