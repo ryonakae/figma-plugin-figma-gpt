@@ -95,7 +95,7 @@ export default function Chat() {
         value={settings.chatPrompt}
         onInput={onPromptInput}
         placeholder="Write a tagline for an ice cream shop."
-        rows={30}
+        rows={25}
       />
       <VerticalSpace space="extraSmall" />
       <Button
