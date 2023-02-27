@@ -5,10 +5,15 @@
     "typeRoots": ["node_modules/@figma", "node_modules/@types"],
     "paths": {
       "@/*": ["src/*"],
-      "react": ["./node_modules/preact/compat/"],
-      "react-dom": ["./node_modules/preact/compat/"]
+      "react": ["node_modules/preact/compat/"],
+      "react-dom": ["node_modules/preact/compat/"],
+      "react-dom/test-utils": ["node_modules/preact/test-utils/"],
+      "react/jsx-runtime": ["node_modules/preact/jsx-runtime/"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@emotion/react",
+    "jsxFactory": null
   },
   "include": ["src"],
   "exclude": ["node_modules", "build"]

@@ -47,6 +47,7 @@
     "prefer-const": "warn",
     "react/jsx-no-comment-textnodes": "warn",
     "react/no-unescaped-entities": "warn",
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }],
     "react/react-in-jsx-scope": "off"
   }
 }

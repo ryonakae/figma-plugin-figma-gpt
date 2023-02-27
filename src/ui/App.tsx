@@ -3,6 +3,7 @@ import { useRef, useState } from 'preact/hooks'
 
 import { Tabs, TabsOption } from '@create-figma-plugin/ui'
 import { emit, once } from '@create-figma-plugin/utilities'
+import { css, Global } from '@emotion/react'
 import { useMount, useUpdateEffect } from 'react-use'
 
 import { UI_HEIGHT, UI_WIDTH } from '@/constants'
@@ -74,8 +75,31 @@ export default function App() {
   }, [tabValue])
 
   return (
-    <div ref={wrapperRef}>
-      <Tabs onChange={onTabChange} options={tabOptions} value={tabValue} />
-    </div>
+    <>
+      <Global
+        styles={css`
+          .parameterTitle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &.withRangeSlider {
+              margin-bottom: -5px;
+            }
+          }
+
+          .parameterTitleInput {
+            width: 45px;
+
+            & input {
+              text-align: right;
+            }
+          }
+        `}
+      />
+      <div ref={wrapperRef}>
+        <Tabs onChange={onTabChange} options={tabOptions} value={tabValue} />
+      </div>
+    </>
   )
 }

@@ -13,4 +13,4 @@ function Plugin() {
   )
 }
 
-export default render(Plugin)
+export default render(Plugin as any)
