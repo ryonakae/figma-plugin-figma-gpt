@@ -26,6 +26,10 @@ export default function Chat() {
   async function onSubmitClick() {
     setLoading(true)
 
+    const prompt = `You are an excellent AI. Based on your knowledge, please answer the questions accurately.
+Q: ${settings.chatPrompt}
+A:`
+
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
       headers: {
@@ -41,7 +45,7 @@ export default function Chat() {
         frequency_penalty: settings.frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
         presence_penalty: settings.presencePenalty, // 単語の再利用 min:-2.0 max:2.0
         best_of: settings.bestOf,
-        prompt: settings.chatPrompt,
+        prompt: prompt,
       }),
     })
       .then(async response => {
@@ -56,14 +60,38 @@ export default function Chat() {
         // 成功時の処理
         const data = await response.json()
         console.log(data)
+
         setSettings({
           ...settings,
-          chatPrompt:
-            settings.chatPrompt + '\n\n' + data.choices[0].text.trim(),
+          chatPrompt: settings.chatPrompt + '\n\n',
         })
-        emit<NotifyHandler>('NOTIFY', {
-          message: 'Response returned.',
-        })
+
+        const characterIterator = (data.choices[0].text as string)
+          .trim()
+          [Symbol.iterator]()
+        let timerId: number
+
+        function updatePrompt() {
+          const nextCharacter = characterIterator.next()
+
+          if (nextCharacter.done) {
+            clearTimeout(timerId)
+            emit<NotifyHandler>('NOTIFY', {
+              message: 'Response returned.',
+            })
+            return
+          }
+
+          setSettings(current => {
+            return {
+              ...settings,
+              chatPrompt: current.chatPrompt + nextCharacter.value,
+            }
+          })
+
+          timerId = setTimeout(updatePrompt, 10)
+        }
+        updatePrompt()
       })
       .catch((err: Error) => {
         console.log('err', err.message)
