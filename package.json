@@ -6,8 +6,10 @@
     "@create-figma-plugin/ui": "^2.2.0",
     "@create-figma-plugin/utilities": "^2.2.0",
     "@emotion/react": "^11.10.6",
+    "gpt-3-encoder": "latitudegames/GPT-3-Encoder#pull/33/head",
     "preact": ">=10",
     "prismjs": "^1.29.0",
+    "react-scroll-to-bottom": "^4.2.0",
     "react-simple-code-editor": "^0.13.1",
     "react-use": "^17.4.0",
     "unstated-next": "^1.1.0"
@@ -17,6 +19,7 @@
     "@create-figma-plugin/tsconfig": "^2.2.0",
     "@figma/plugin-typings": "1.57.1",
     "@types/prismjs": "^1.26.0",
+    "@types/react-scroll-to-bottom": "^4.2.0",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
     "eslint": "^8.6.0",

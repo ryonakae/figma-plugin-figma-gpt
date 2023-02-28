@@ -187,7 +187,8 @@ export default function Main() {
           }
         `}
       >
-        <Editor
+        {/* <Editor
+          ref={}
           value={settings.codeResponse}
           onValueChange={(code: string) =>
             setSettings({ ...settings, codeResponse: code })
@@ -197,7 +198,7 @@ export default function Main() {
           preClassName="react-simple-code-editor__pre"
           textareaClassName="react-simple-code-editor__textarea"
           spellcheck={false}
-        />
+        /> */}
       </div>
       <VerticalSpace space="extraSmall" />
       <div

@@ -1,22 +1,37 @@
 import { h, JSX } from 'preact'
-import { useState } from 'preact/hooks'
+import { useRef, useState } from 'preact/hooks'
 
 import {
   Button,
   Container,
+  Divider,
+  Link,
+  Muted,
+  Text,
   TextboxMultiline,
+  useInitialFocus,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
-import { useCopyToClipboard } from 'react-use'
+import { css } from '@emotion/react'
+import { encode } from 'gpt-3-encoder'
+import ScrollToBottom from 'react-scroll-to-bottom'
+import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
 
-import { NotifyHandler, OpenAiApiError } from '@/types'
+import { DEFAULT_SETTINGS } from '@/constants'
+import {
+  Conversation,
+  NotifyHandler,
+  OpenAiApiError,
+  OpenAiApiResponse,
+} from '@/types'
 import Store from '@/ui/Store'
 
 export default function Chat() {
   const { settings, setSettings } = Store.useContainer()
   const [loading, setLoading] = useState(false)
-  const [_, copyToClipboard] = useCopyToClipboard()
+  const [tokens, setTokens] = useState(0)
+  const initialFocus = useInitialFocus()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
@@ -26,9 +41,24 @@ export default function Chat() {
   async function onSubmitClick() {
     setLoading(true)
 
-    const prompt = `You are an excellent AI. Based on your knowledge, please answer the questions accurately.
+    const prompt = `Based on your knowledge, please answer the questions accurately.
 Q: ${settings.chatPrompt}
 A:`
+
+    setSettings(current => {
+      return {
+        ...settings,
+        conversations: [
+          ...current.conversations,
+          {
+            from: 'human',
+            message: settings.chatPrompt,
+            tokens: tokens,
+          },
+        ],
+        chatPrompt: '',
+      }
+    })
 
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
@@ -58,40 +88,23 @@ A:`
         }
 
         // 成功時の処理
-        const data = await response.json()
+        const data = (await response.json()) as OpenAiApiResponse
         console.log(data)
 
-        setSettings({
-          ...settings,
-          chatPrompt: settings.chatPrompt + '\n\n',
-        })
-
-        const characterIterator = (data.choices[0].text as string)
-          .trim()
-          [Symbol.iterator]()
-        let timerId: number
-
-        function updatePrompt() {
-          const nextCharacter = characterIterator.next()
-
-          if (nextCharacter.done) {
-            clearTimeout(timerId)
-            emit<NotifyHandler>('NOTIFY', {
-              message: 'Response returned.',
-            })
-            return
+        setSettings(current => {
+          return {
+            ...settings,
+            conversations: [
+              ...current.conversations,
+              {
+                from: 'ai',
+                message: data.choices[0].text.trim(),
+                tokens: data.usage.completion_tokens,
+              },
+            ],
+            chatPrompt: '',
           }
-
-          setSettings(current => {
-            return {
-              ...settings,
-              chatPrompt: current.chatPrompt + nextCharacter.value,
-            }
-          })
-
-          timerId = setTimeout(updatePrompt, 10)
-        }
-        updatePrompt()
+        })
       })
       .catch((err: Error) => {
         console.log('err', err.message)
@@ -107,48 +120,191 @@ A:`
       })
   }
 
-  function onCopyClick() {
-    copyToClipboard(settings.chatPrompt)
+  function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+    setSettings({ ...settings, conversations: [] })
     emit<NotifyHandler>('NOTIFY', {
-      message: 'Copied to clipboard.',
+      message: 'Conversation cleared.',
     })
   }
 
+  useUpdateEffect(() => {
+    const encodedPrompt = encode(settings.chatPrompt)
+    setTokens(encodedPrompt.length)
+  }, [settings.chatPrompt])
+
   return (
-    <Container space="medium">
-      <VerticalSpace space="medium" />
-
-      <TextboxMultiline
-        variant="border"
-        value={settings.chatPrompt}
-        onInput={onPromptInput}
-        placeholder="Write a tagline for an ice cream shop."
-        rows={25}
-      />
-      <VerticalSpace space="extraSmall" />
-      <Button
-        fullWidth
-        onClick={onSubmitClick}
-        loading={loading}
-        disabled={
-          loading ||
-          settings.chatPrompt.length === 0 ||
-          settings.apiKey.length === 0
-        }
+    <div
+      css={css`
+        height: 500px;
+        display: flex;
+        flex-direction: column;
+      `}
+    >
+      {/* chat area */}
+      <div
+        css={css`
+          flex: 1;
+          position: relative;
+        `}
       >
-        Submit
-      </Button>
-      <VerticalSpace space="extraSmall" />
-      <Button
-        fullWidth
-        secondary
-        disabled={loading || settings.chatPrompt.length === 0}
-        onClick={onCopyClick}
-      >
-        Copy to clipboard
-      </Button>
+        <ScrollToBottom
+          css={css`
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          `}
+        >
+          {settings.conversations.map((conversation, index) => {
+            if (conversation.from === 'human') {
+              return (
+                <div
+                  key={index}
+                  css={css`
+                    padding: var(--space-small) var(--space-medium);
+                    display: flex;
+                    gap: var(--space-small);
+                    align-items: center;
+                  `}
+                >
+                  {/* icon */}
+                  <div
+                    css={css`
+                      width: 32px;
+                      height: 32px;
+                      background-color: var(--figma-color-icon-brand-tertiary);
+                      border-radius: var(--border-radius-6);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    `}
+                  >
+                    <Muted>You</Muted>
+                  </div>
+                  <span>{conversation.message}</span>
+                </div>
+              )
+            } else if (conversation.from === 'ai') {
+              return (
+                <div
+                  key={index}
+                  css={css`
+                    padding: var(--space-small) var(--space-medium);
+                    background-color: var(--figma-color-bg-secondary);
+                    display: flex;
+                    gap: var(--space-small);
+                    align-items: center;
+                  `}
+                >
+                  {/* icon */}
+                  <div
+                    css={css`
+                      width: 32px;
+                      height: 32px;
+                      background-color: var(--figma-color-bg-warning-tertiary);
+                      border-radius: var(--border-radius-6);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-shrink: 0;
+                    `}
+                  >
+                    <Muted>AI</Muted>
+                  </div>
+                  <span>{conversation.message}</span>
+                </div>
+              )
+            }
+          })}
 
-      <VerticalSpace space="medium" />
-    </Container>
+          {settings.conversations.length >= 2 && (
+            <div
+              css={css`
+                padding: var(--space-small);
+                text-align: center;
+              `}
+            >
+              <Link href="#" onClick={onClearClick}>
+                Crear conversation
+              </Link>
+            </div>
+          )}
+        </ScrollToBottom>
+      </div>
+
+      <Divider />
+
+      {/* prompt */}
+      <div
+        css={css`
+          padding: var(--space-small) var(--space-medium);
+        `}
+      >
+        {/* textarea and submit button */}
+        <div
+          css={css`
+            position: relative;
+          `}
+        >
+          {/* textarea */}
+          <div
+            css={css`
+              textarea {
+                padding-right: 95px;
+                min-height: 48px;
+              }
+            `}
+          >
+            <TextboxMultiline
+              {...initialFocus}
+              variant="border"
+              grow
+              value={settings.chatPrompt}
+              onInput={onPromptInput}
+              placeholder="Write a tagline for an ice cream shop."
+              rows={1}
+            />
+          </div>
+
+          {/* submit button */}
+          <div
+            css={css`
+              position: absolute;
+              right: var(--space-extra-small);
+              bottom: var(--space-extra-small);
+            `}
+          >
+            <Button
+              onClick={onSubmitClick}
+              loading={loading}
+              disabled={loading || settings.chatPrompt.length === 0}
+            >
+              Submit
+            </Button>
+          </div>
+        </div>
+
+        <VerticalSpace space="extraSmall" />
+
+        {/* current model and tokens */}
+        <div
+          css={css`
+            display: flex;
+            justify-content: space-between;
+          `}
+        >
+          <Text>
+            <Muted>Model: {settings.model}</Muted>
+          </Text>
+
+          <Text>
+            <Muted>Prompt: {tokens} tokens</Muted>
+          </Text>
+        </div>
+      </div>
+    </div>
   )
 }

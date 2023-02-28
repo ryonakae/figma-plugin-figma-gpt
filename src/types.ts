@@ -22,6 +22,7 @@ export type Settings = {
   codePrompt: string
   codeResponse: string
   codePromptSpecialize: boolean
+  conversations: Conversation[]
 }
 
 export interface LoadSettingsHandler extends EventHandler {
@@ -49,6 +50,22 @@ export interface ExecHandler extends EventHandler {
   handler: (code: string) => void
 }
 
+export type OpenAiApiResponse = {
+  choices: {
+    index: number
+    text: string
+    finish_reason: string
+  }[]
+  created: number
+  id: string
+  model: Model
+  usage: {
+    completion_tokens: number
+    prompt_tokens: number
+    total_tokens: number
+  }
+}
+
 export type OpenAiApiError = {
   error: {
     message: string
@@ -56,4 +73,10 @@ export type OpenAiApiError = {
     // param?: string
     // code?: string
   }
+}
+
+export type Conversation = {
+  from: 'human' | 'ai'
+  message: string
+  tokens: number
 }
