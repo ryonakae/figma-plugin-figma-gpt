@@ -14,6 +14,7 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
+import { css } from '@emotion/react'
 import { useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
@@ -129,9 +130,11 @@ export default function Setting() {
   }, [settings.model, settings.maxTokens])
 
   return (
-    <Container space="medium">
-      <VerticalSpace space="medium" />
-
+    <div
+      css={css`
+        padding: var(--space-medium);
+      `}
+    >
       {/* api key */}
       <div className="parameterTitle">
         <Text>
@@ -324,8 +327,6 @@ export default function Setting() {
       <Button fullWidth secondary onClick={onResetClick}>
         Reset parameters
       </Button>
-
-      <VerticalSpace space="medium" />
-    </Container>
+    </div>
   )
 }

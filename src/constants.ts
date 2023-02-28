@@ -19,4 +19,5 @@ export const DEFAULT_SETTINGS: Settings = {
   codePrompt: '',
   codeResponse: '',
   codePromptSpecialize: false,
+  conversations: [],
 }

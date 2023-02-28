@@ -20,7 +20,7 @@ import Store from '@/ui/Store'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
-  { children: <Code />, value: 'Code' },
+  // { children: <Code />, value: 'Code' },
   { children: <Setting />, value: 'Setting' },
 ]
 
