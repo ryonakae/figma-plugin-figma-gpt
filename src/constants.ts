@@ -7,17 +7,14 @@ export const UI_HEIGHT = 0
 
 export const DEFAULT_SETTINGS: Settings = {
   apiKey: '',
-  model: 'text-ada-001',
+  model: 'gpt-3.5-turbo',
   temperature: 0.7,
-  maxTokens: 256,
+  maxTokens: 1024,
   stop: '',
   topP: 1,
   frequencyPenalty: 0,
   presencePenalty: 0,
-  bestOf: 1,
   chatPrompt: '',
-  codePrompt: '',
-  codeResponse: '',
-  codePromptSpecialize: false,
-  conversations: [],
+  chatMessages: [],
+  textPrompt: '',
 }

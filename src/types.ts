@@ -1,6 +1,8 @@
 import { EventHandler } from '@create-figma-plugin/utilities'
 
 export type Model =
+  | 'gpt-3.5-turbo'
+  | 'gpt-3.5-turbo-0301'
   | 'text-davinci-003'
   | 'text-curie-001'
   | 'text-babbage-001'
@@ -17,12 +19,9 @@ export type Settings = {
   topP: number
   frequencyPenalty: number
   presencePenalty: number
-  bestOf: number
   chatPrompt: string
-  codePrompt: string
-  codeResponse: string
-  codePromptSpecialize: boolean
-  conversations: Conversation[]
+  chatMessages: OpenAiChatMessage[]
+  textPrompt: string
 }
 
 export interface LoadSettingsHandler extends EventHandler {
@@ -50,18 +49,61 @@ export interface ExecHandler extends EventHandler {
   handler: (code: string) => void
 }
 
-export type OpenAiApiResponse = {
+export type OpenAiChatMessage = {
+  role: 'system' | 'user' | 'assistant'
+  content: string
+}
+
+export type OpenAiApiChatRequest = {
+  model: Model
+  messages: OpenAiChatMessage[]
+  temperature?: number
+  top_p?: number
+  stop?: string
+  max_tokens?: number
+  presence_penalty?: number
+  frequency_penalty?: number
+}
+
+export type OpenAiApiChatResponse = {
+  id: string
+  created: number
+  object: string
+  choices: {
+    index: number
+    message: OpenAiChatMessage
+    finish_reason: string
+  }[]
+  usage: {
+    prompt_tokens: number
+    completion_tokens: number
+    total_tokens: number
+  }
+}
+
+export type OpenAiApiTextRequest = {
+  model: Model
+  prompt: string
+  temperature?: number
+  top_p?: number
+  stop?: string
+  max_tokens?: number
+  presence_penalty?: number
+  frequency_penalty?: number
+}
+
+export type OpenAiApiTextResponse = {
+  id: string
+  created: number
+  object: string
   choices: {
     index: number
     text: string
     finish_reason: string
   }[]
-  created: number
-  id: string
-  model: Model
   usage: {
-    completion_tokens: number
     prompt_tokens: number
+    completion_tokens: number
     total_tokens: number
   }
 }
@@ -73,10 +115,4 @@ export type OpenAiApiError = {
     // param?: string
     // code?: string
   }
-}
-
-export type Conversation = {
-  from: 'human' | 'ai'
-  message: string
-  tokens: number
 }

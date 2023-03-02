@@ -8,27 +8,24 @@ import {
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
+import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
 import { NotifyHandler, OpenAiApiError } from '@/types'
 import Store from '@/ui/Store'
 
-export default function Chat() {
+export default function Text() {
   const { settings, setSettings } = Store.useContainer()
   const [loading, setLoading] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
-    setSettings({ ...settings, chatPrompt: newValue })
+    setSettings({ ...settings, textPrompt: newValue })
   }
 
   async function onSubmitClick() {
     setLoading(true)
-
-    const prompt = `You are an excellent AI. Based on your knowledge, please answer the questions accurately.
-Q: ${settings.chatPrompt}
-A:`
 
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
@@ -38,14 +35,13 @@ A:`
       },
       body: JSON.stringify({
         model: settings.model,
-        temperature: settings.temperature, // 単語のランダム性 min:0.1 max:2.0
-        max_tokens: settings.maxTokens, // 出力される文章量の最大値（トークン数） max:4096
-        stop: settings.stop, // 途中で生成を停止する単語
-        top_p: settings.topP, // 単語のランダム性 min:-2.0 max:2.0
-        frequency_penalty: settings.frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
-        presence_penalty: settings.presencePenalty, // 単語の再利用 min:-2.0 max:2.0
-        best_of: settings.bestOf,
-        prompt: prompt,
+        temperature: settings.temperature,
+        max_tokens: settings.maxTokens,
+        stop: settings.stop,
+        top_p: settings.topP,
+        frequency_penalty: settings.frequencyPenalty,
+        presence_penalty: settings.presencePenalty,
+        prompt: settings.textPrompt,
       }),
     })
       .then(async response => {
@@ -61,9 +57,11 @@ A:`
         const data = await response.json()
         console.log(data)
 
-        setSettings({
-          ...settings,
-          chatPrompt: settings.chatPrompt + '\n\n',
+        setSettings(current => {
+          return {
+            ...current,
+            textPrompt: current.textPrompt + '\n\n',
+          }
         })
 
         const characterIterator = (data.choices[0].text as string)
@@ -84,8 +82,8 @@ A:`
 
           setSettings(current => {
             return {
-              ...settings,
-              chatPrompt: current.chatPrompt + nextCharacter.value,
+              ...current,
+              textPrompt: current.textPrompt + nextCharacter.value,
             }
           })
 
@@ -108,7 +106,7 @@ A:`
   }
 
   function onCopyClick() {
-    copyToClipboard(settings.chatPrompt)
+    copyToClipboard(settings.textPrompt)
     emit<NotifyHandler>('NOTIFY', {
       message: 'Copied to clipboard.',
     })
@@ -118,34 +116,40 @@ A:`
     <Container space="medium">
       <VerticalSpace space="medium" />
 
-      <TextboxMultiline
-        variant="border"
-        value={settings.chatPrompt}
-        onInput={onPromptInput}
-        placeholder="Write a tagline for an ice cream shop."
-        rows={25}
-      />
+      <div
+        css={css`
+          position: relative;
+        `}
+      >
+        <TextboxMultiline
+          variant="border"
+          value={settings.textPrompt}
+          onInput={onPromptInput}
+          placeholder="Write a tagline for an ice cream shop."
+          rows={25}
+        />
+        {settings.textPrompt.length > 0 && (
+          <div
+            css={css`
+              position: absolute;
+              right: var(--space-small);
+              bottom: var(--space-small);
+            `}
+          >
+            <Button secondary disabled={loading} onClick={onCopyClick}>
+              Copy
+            </Button>
+          </div>
+        )}
+      </div>
       <VerticalSpace space="extraSmall" />
       <Button
         fullWidth
         onClick={onSubmitClick}
         loading={loading}
-        disabled={
-          loading ||
-          settings.chatPrompt.length === 0 ||
-          settings.apiKey.length === 0
-        }
+        disabled={loading || settings.textPrompt.length === 0}
       >
         Submit
-      </Button>
-      <VerticalSpace space="extraSmall" />
-      <Button
-        fullWidth
-        secondary
-        disabled={loading || settings.chatPrompt.length === 0}
-        onClick={onCopyClick}
-      >
-        Copy to clipboard
       </Button>
 
       <VerticalSpace space="medium" />
