@@ -2,7 +2,7 @@
 
 ![](./cover.png)
 
-A plugin that can talk with the ChatGPT.  
+A plugin that can talk with the ChatGPT (**It has the same performance as [ChatGPT website](https://chat.openai.com/chat)**).  
 You can easily copy and use the chat texts, and customize the response by adjusting the parameters.  
 It's up to you how you use it!
 
