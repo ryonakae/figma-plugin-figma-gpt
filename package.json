@@ -35,7 +35,7 @@
     "editorType": [
       "figma"
     ],
-    "id": "figma-gpt",
+    "id": "1213050091855586023",
     "name": "Figma GPT",
     "main": "src/main/index.ts",
     "ui": "src/ui/index.tsx",
