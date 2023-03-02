@@ -1,9 +1,8 @@
-import { h, JSX } from 'preact'
-import { useEffect, useRef, useState } from 'preact/hooks'
+import { JSX } from 'preact'
+import { useState } from 'preact/hooks'
 
 import {
   Button,
-  Container,
   Divider,
   Link,
   Muted,
@@ -15,24 +14,51 @@ import {
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { encode } from 'gpt-3-encoder'
+import { useHotkeys } from 'react-hotkeys-hook'
 import ScrollToBottom from 'react-scroll-to-bottom'
-import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
+import { useUpdateEffect } from 'react-use'
 
-import { DEFAULT_SETTINGS } from '@/constants'
 import {
   NotifyHandler,
   OpenAiApiError,
   OpenAiApiChatRequest,
   OpenAiApiChatResponse,
-  OpenAiChatMessage,
 } from '@/types'
 import Store from '@/ui/Store'
+import Message from '@/ui/components/Message'
 
 export default function Chat() {
   const { settings, setSettings } = Store.useContainer()
+  const [focusPrompt, setFocusPropmt] = useState(false)
   const [loading, setLoading] = useState(false)
   const [tokens, setTokens] = useState(0)
   const initialFocus = useInitialFocus()
+
+  useHotkeys(
+    ['meta+enter', 'ctrl+enter'],
+    (event, handler) => {
+      if (!focusPrompt || settings.chatPrompt.length === 0) {
+        console.log('aborted', focusPrompt, settings.chatPrompt.length)
+        return
+      }
+
+      console.log('cmd + enter pressed', event, handler)
+      onSubmitClick()
+    },
+    {
+      enableOnFormTags: true,
+    }
+  )
+
+  function onPromptFocus() {
+    console.log('onPromptFocus')
+    setFocusPropmt(true)
+  }
+
+  function onPromptBlur() {
+    console.log('onPromptBlur')
+    setFocusPropmt(false)
+  }
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
     const newValue = event.currentTarget.value
@@ -153,93 +179,41 @@ export default function Chat() {
             height: 100%;
           `}
         >
-          {settings.chatMessages.map((chatMessage, index) => {
-            if (chatMessage.role === 'user') {
-              return (
-                <div
-                  key={index}
-                  css={css`
-                    padding: var(--space-small) var(--space-medium);
-                    display: flex;
-                    gap: var(--space-small);
-                    align-items: center;
-                  `}
-                >
-                  {/* icon */}
-                  <div
-                    css={css`
-                      width: 32px;
-                      height: 32px;
-                      background-color: var(--figma-color-icon-brand-tertiary);
-                      border-radius: var(--border-radius-6);
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      flex-shrink: 0;
-                    `}
-                  >
-                    <Muted>You</Muted>
-                  </div>
-                  <span
-                    css={css`
-                      white-space: pre-wrap;
-                      word-break: break-word;
-                    `}
-                  >
-                    {chatMessage.content}
-                  </span>
-                </div>
-              )
-            } else if (chatMessage.role === 'assistant') {
-              return (
-                <div
-                  key={index}
-                  css={css`
-                    padding: var(--space-small) var(--space-medium);
-                    background-color: var(--figma-color-bg-secondary);
-                    display: flex;
-                    gap: var(--space-small);
-                    align-items: center;
-                  `}
-                >
-                  {/* icon */}
-                  <div
-                    css={css`
-                      width: 32px;
-                      height: 32px;
-                      background-color: var(--figma-color-bg-warning-tertiary);
-                      border-radius: var(--border-radius-6);
-                      display: flex;
-                      align-items: center;
-                      justify-content: center;
-                      flex-shrink: 0;
-                    `}
-                  >
-                    <Muted>AI</Muted>
-                  </div>
-                  <span
-                    css={css`
-                      white-space: pre-wrap;
-                      word-break: break-word;
-                    `}
-                  >
-                    {chatMessage.content}
-                  </span>
-                </div>
-              )
-            }
-          })}
+          {settings.chatMessages.map((chatMessage, index) => (
+            <Message
+              key={index}
+              role={chatMessage.role}
+              content={chatMessage.content}
+            />
+          ))}
 
           {settings.chatMessages.length >= 2 && (
             <div
               css={css`
-                padding: var(--space-small);
+                padding: var(--space-extra-small);
                 text-align: center;
               `}
             >
               <Link href="#" onClick={onClearClick}>
                 Crear conversation
               </Link>
+            </div>
+          )}
+
+          {/* empty */}
+          {settings.chatMessages.length === 0 && (
+            <div
+              css={css`
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+            >
+              <Text>
+                <Muted>Let's start a chat!</Muted>
+              </Text>
             </div>
           )}
         </ScrollToBottom>
@@ -267,6 +241,8 @@ export default function Chat() {
                 min-height: 48px;
               }
             `}
+            onFocus={onPromptFocus}
+            onBlur={onPromptBlur}
           >
             <TextboxMultiline
               {...initialFocus}
@@ -274,7 +250,6 @@ export default function Chat() {
               grow
               value={settings.chatPrompt}
               onInput={onPromptInput}
-              placeholder="Write a tagline for an ice cream shop."
               rows={1}
             />
           </div>

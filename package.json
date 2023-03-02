@@ -9,6 +9,7 @@
     "gpt-3-encoder": "latitudegames/GPT-3-Encoder#pull/33/head",
     "preact": ">=10",
     "prismjs": "^1.29.0",
+    "react-hotkeys-hook": "^4.3.7",
     "react-scroll-to-bottom": "^4.2.0",
     "react-simple-code-editor": "^0.13.1",
     "react-use": "^17.4.0",
