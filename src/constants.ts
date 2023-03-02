@@ -17,4 +17,5 @@ export const DEFAULT_SETTINGS: Settings = {
   chatPrompt: '',
   chatMessages: [],
   textPrompt: '',
+  totalTokens: 0,
 }

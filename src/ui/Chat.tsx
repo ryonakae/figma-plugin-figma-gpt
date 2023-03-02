@@ -31,7 +31,7 @@ export default function Chat() {
   const { settings, setSettings } = Store.useContainer()
   const [focusPrompt, setFocusPropmt] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [tokens, setTokens] = useState(0)
+  const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
 
   useHotkeys(
@@ -125,6 +125,7 @@ export default function Chat() {
               },
             ],
             chatPrompt: '', // なぜかここでもクリアしないと反映されない
+            totalTokens: data.usage.total_tokens,
           }
         })
       })
@@ -144,7 +145,7 @@ export default function Chat() {
 
   function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
     event.preventDefault()
-    setSettings({ ...settings, chatMessages: [] })
+    setSettings({ ...settings, chatMessages: [], totalTokens: 0 })
     emit<NotifyHandler>('NOTIFY', {
       message: 'Conversation cleared.',
     })
@@ -152,7 +153,7 @@ export default function Chat() {
 
   useUpdateEffect(() => {
     const encodedPrompt = encode(settings.chatPrompt)
-    setTokens(encodedPrompt.length)
+    setPromptTokens(encodedPrompt.length)
   }, [settings.chatPrompt])
 
   return (
@@ -177,7 +178,12 @@ export default function Chat() {
             left: 0;
             width: 100%;
             height: 100%;
+
+            .followButton {
+              display: none;
+            }
           `}
+          followButtonClassName="followButton"
         >
           {settings.chatMessages.map((chatMessage, index) => (
             <Message
@@ -286,7 +292,16 @@ export default function Chat() {
           </Text>
 
           <Text>
-            <Muted>Prompt: {tokens} tokens</Muted>
+            <Muted>
+              <span
+                css={css`
+                  font-variant-numeric: tabular-nums;
+                `}
+              >
+                Prompt: {promptTokens} tokens / Total: {settings.totalTokens}{' '}
+                tokens
+              </span>
+            </Muted>
           </Text>
         </div>
       </div>

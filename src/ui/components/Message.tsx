@@ -73,7 +73,17 @@ export default function Message({ role, content, ...props }: MessageProps) {
             `,
         ]}
       >
-        {role === 'user' && <Muted>You</Muted>}
+        {role === 'user' && (
+          <Muted>
+            <span
+              css={css`
+                font-size: var(--font-size-10);
+              `}
+            >
+              You
+            </span>
+          </Muted>
+        )}
         {role === 'assistant' && (
           <img
             src={OpenAiLogo}
