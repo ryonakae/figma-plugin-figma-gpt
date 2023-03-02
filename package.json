@@ -57,7 +57,7 @@
     ]
   },
   "scripts": {
-    "build": "build-figma-plugin --typecheck --minify",
+    "build": "NODE_ENV=production build-figma-plugin --typecheck --minify",
     "lint-fix": "yarn lint:prettier --write && yarn lint:eslint --fix",
     "lint:eslint": "eslint --ext .ts,.tsx . --ignore-path .gitignore",
     "lint:prettier": "prettier --check . --ignore-path .gitignore",
