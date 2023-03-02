@@ -22,12 +22,14 @@ import { Model, NotifyHandler } from '@/types'
 import Store from '@/ui/Store'
 
 const modelOptions: Array<DropdownOption<Model>> = [
-  { value: 'text-davinci-003' },
-  { value: 'text-curie-001' },
-  { value: 'text-babbage-001' },
-  { value: 'text-ada-001' },
-  { value: 'code-davinci-002' },
-  { value: 'code-cushman-001' },
+  { value: 'gpt-3.5-turbo' },
+  { value: 'gpt-3.5-turbo-0301' },
+  // { value: 'text-davinci-003' },
+  // { value: 'text-curie-001' },
+  // { value: 'text-babbage-001' },
+  // { value: 'text-ada-001' },
+  // { value: 'code-davinci-002' },
+  // { value: 'code-cushman-001' },
 ]
 
 export default function Setting() {
@@ -73,13 +75,6 @@ export default function Setting() {
     })
   }
 
-  function onBestOfChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({
-      ...settings,
-      bestOf: Number(event.currentTarget.value),
-    })
-  }
-
   function getMaximumLength(model: Model) {
     let length: number
 
@@ -104,7 +99,6 @@ export default function Setting() {
       topP: DEFAULT_SETTINGS.topP,
       frequencyPenalty: DEFAULT_SETTINGS.frequencyPenalty,
       presencePenalty: DEFAULT_SETTINGS.presencePenalty,
-      bestOf: DEFAULT_SETTINGS.bestOf,
     })
 
     emit<NotifyHandler>('NOTIFY', {
@@ -166,7 +160,7 @@ export default function Setting() {
         </Text>
         <Text>
           <Link
-            href="https://platform.openai.com/docs/api-reference/completions/create#completions/create-model"
+            href="https://platform.openai.com/docs/api-reference/chat"
             target="_blank"
           >
             Documentation
@@ -299,26 +293,6 @@ export default function Setting() {
         minimum={0}
         value={String(settings.presencePenalty)}
         onChange={onPresencePenaltyChange}
-      />
-
-      {/* best of */}
-      <div className="parameterTitle withRangeSlider">
-        <Text>
-          <Muted>Best of</Muted>
-        </Text>
-        <div className="parameterTitleInput">
-          <TextboxNumeric
-            value={String(settings.bestOf)}
-            onInput={onBestOfChange}
-          />
-        </div>
-      </div>
-      <RangeSlider
-        increment={1}
-        maximum={20}
-        minimum={0}
-        value={String(settings.bestOf)}
-        onChange={onBestOfChange}
       />
 
       <VerticalSpace space="extraSmall" />

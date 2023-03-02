@@ -1,5 +1,5 @@
 import { h, JSX } from 'preact'
-import { useRef, useState } from 'preact/hooks'
+import { useEffect, useRef, useState } from 'preact/hooks'
 
 import {
   Button,
@@ -20,10 +20,11 @@ import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
 import {
-  Conversation,
   NotifyHandler,
   OpenAiApiError,
-  OpenAiApiResponse,
+  OpenAiApiChatRequest,
+  OpenAiApiChatResponse,
+  OpenAiChatMessage,
 } from '@/types'
 import Store from '@/ui/Store'
 
@@ -41,26 +42,23 @@ export default function Chat() {
   async function onSubmitClick() {
     setLoading(true)
 
-    const prompt = `Based on your knowledge, please answer the questions accurately.
-Q: ${settings.chatPrompt}
-A:`
+    const prompt = settings.chatPrompt
 
     setSettings(current => {
       return {
         ...settings,
-        conversations: [
-          ...current.conversations,
+        chatMessages: [
+          ...current.chatMessages,
           {
-            from: 'human',
-            message: settings.chatPrompt,
-            tokens: tokens,
+            role: 'user',
+            content: prompt,
           },
         ],
         chatPrompt: '',
       }
     })
 
-    fetch('https://api.openai.com/v1/completions', {
+    fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,15 +66,14 @@ A:`
       },
       body: JSON.stringify({
         model: settings.model,
-        temperature: settings.temperature, // 単語のランダム性 min:0.1 max:2.0
-        max_tokens: settings.maxTokens, // 出力される文章量の最大値（トークン数） max:4096
-        stop: settings.stop, // 途中で生成を停止する単語
-        top_p: settings.topP, // 単語のランダム性 min:-2.0 max:2.0
-        frequency_penalty: settings.frequencyPenalty, // 単語の再利用 min:-2.0 max:2.0
-        presence_penalty: settings.presencePenalty, // 単語の再利用 min:-2.0 max:2.0
-        best_of: settings.bestOf,
-        prompt: prompt,
-      }),
+        messages: [...settings.chatMessages, { role: 'user', content: prompt }],
+        temperature: settings.temperature,
+        max_tokens: settings.maxTokens,
+        stop: settings.stop,
+        top_p: settings.topP,
+        frequency_penalty: settings.frequencyPenalty,
+        presence_penalty: settings.presencePenalty,
+      } as OpenAiApiChatRequest),
     })
       .then(async response => {
         // エラーコードが返って来た場合、エラーを投げる（catchに書いている処理を実行）
@@ -88,21 +85,20 @@ A:`
         }
 
         // 成功時の処理
-        const data = (await response.json()) as OpenAiApiResponse
+        const data = (await response.json()) as OpenAiApiChatResponse
         console.log(data)
 
         setSettings(current => {
           return {
             ...settings,
-            conversations: [
-              ...current.conversations,
+            chatMessages: [
+              ...current.chatMessages,
               {
-                from: 'ai',
-                message: data.choices[0].text.trim(),
-                tokens: data.usage.completion_tokens,
+                role: 'assistant',
+                content: data.choices[0].message.content.trim(),
               },
             ],
-            chatPrompt: '',
+            chatPrompt: '', // なぜかここでもクリアしないと反映されない
           }
         })
       })
@@ -122,7 +118,7 @@ A:`
 
   function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
     event.preventDefault()
-    setSettings({ ...settings, conversations: [] })
+    setSettings({ ...settings, chatMessages: [] })
     emit<NotifyHandler>('NOTIFY', {
       message: 'Conversation cleared.',
     })
@@ -157,8 +153,8 @@ A:`
             height: 100%;
           `}
         >
-          {settings.conversations.map((conversation, index) => {
-            if (conversation.from === 'human') {
+          {settings.chatMessages.map((chatMessage, index) => {
+            if (chatMessage.role === 'user') {
               return (
                 <div
                   key={index}
@@ -184,10 +180,17 @@ A:`
                   >
                     <Muted>You</Muted>
                   </div>
-                  <span>{conversation.message}</span>
+                  <span
+                    css={css`
+                      white-space: pre-wrap;
+                      word-break: break-word;
+                    `}
+                  >
+                    {chatMessage.content}
+                  </span>
                 </div>
               )
-            } else if (conversation.from === 'ai') {
+            } else if (chatMessage.role === 'assistant') {
               return (
                 <div
                   key={index}
@@ -214,13 +217,20 @@ A:`
                   >
                     <Muted>AI</Muted>
                   </div>
-                  <span>{conversation.message}</span>
+                  <span
+                    css={css`
+                      white-space: pre-wrap;
+                      word-break: break-word;
+                    `}
+                  >
+                    {chatMessage.content}
+                  </span>
                 </div>
               )
             }
           })}
 
-          {settings.conversations.length >= 2 && (
+          {settings.chatMessages.length >= 2 && (
             <div
               css={css`
                 padding: var(--space-small);

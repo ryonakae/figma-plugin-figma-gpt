@@ -14,13 +14,13 @@ import {
   SaveSettingsHandler,
 } from '@/types'
 import Chat from '@/ui/Chat'
-import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
 import Store from '@/ui/Store'
+import Text from '@/ui/Text'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
-  // { children: <Code />, value: 'Code' },
+  // { children: <Text />, value: 'Text' },
   { children: <Setting />, value: 'Setting' },
 ]
 
