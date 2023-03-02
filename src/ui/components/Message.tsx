@@ -7,7 +7,7 @@ import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
 import { NotifyHandler, OpenAiChatMessage } from '@/types'
-import OpenAiLogo from '@/ui/assets/img/openai.png'
+import Icon from '@/ui/assets/img/icon.png'
 
 type MessageProps = ComponentProps<'div'> & OpenAiChatMessage
 
@@ -86,7 +86,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
         )}
         {role === 'assistant' && (
           <img
-            src={OpenAiLogo}
+            src={Icon}
             css={css`
               width: 20px;
               height: auto;
