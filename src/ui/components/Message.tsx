@@ -7,6 +7,7 @@ import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
 import { NotifyHandler, OpenAiChatMessage } from '@/types'
+import OpenAiLogo from '@/ui/assets/img/openai.png'
 
 type MessageProps = ComponentProps<'div'> & OpenAiChatMessage
 
@@ -68,12 +69,21 @@ export default function Message({ role, content, ...props }: MessageProps) {
             `,
           role === 'assistant' &&
             css`
-              background-color: var(--figma-color-bg-warning-tertiary);
+              background-color: var(--figma-color-icon);
             `,
         ]}
       >
         {role === 'user' && <Muted>You</Muted>}
-        {role === 'assistant' && <Muted>AI</Muted>}
+        {role === 'assistant' && (
+          <img
+            src={OpenAiLogo}
+            css={css`
+              width: 20px;
+              height: auto;
+              mix-blend-mode: exclusion;
+            `}
+          />
+        )}
       </div>
 
       {/* content */}
