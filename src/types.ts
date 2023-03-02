@@ -22,6 +22,7 @@ export type Settings = {
   chatPrompt: string
   chatMessages: OpenAiChatMessage[]
   textPrompt: string
+  totalTokens: number
 }
 
 export interface LoadSettingsHandler extends EventHandler {

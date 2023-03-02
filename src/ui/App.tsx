@@ -78,6 +78,10 @@ export default function App() {
     <>
       <Global
         styles={css`
+          :root {
+            --font-size-10: 10px;
+          }
+
           .parameterTitle {
             display: flex;
             justify-content: space-between;
@@ -93,6 +97,7 @@ export default function App() {
 
             & input {
               text-align: right;
+              font-variant-numeric: tabular-nums;
             }
           }
         `}
