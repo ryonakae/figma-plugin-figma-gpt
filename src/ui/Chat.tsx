@@ -193,7 +193,8 @@ export default function Chat() {
             />
           ))}
 
-          {settings.chatMessages.length >= 2 && (
+          {/* clear button */}
+          {settings.chatMessages.length > 0 && (
             <div
               css={css`
                 padding: var(--space-extra-small);
