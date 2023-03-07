@@ -202,7 +202,7 @@ export default function Chat() {
               `}
             >
               <Link href="#" onClick={onClearClick}>
-                Crear conversation
+                Clear conversation
               </Link>
             </div>
           )}
