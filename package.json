@@ -33,7 +33,8 @@
   "license": "MIT",
   "figma-plugin": {
     "editorType": [
-      "figma"
+      "figma",
+      "figjam"
     ],
     "id": "1213050091855586023",
     "name": "Figma GPT",
