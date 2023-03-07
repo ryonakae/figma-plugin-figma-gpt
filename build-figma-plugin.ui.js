@@ -1,3 +1,6 @@
+/**
+ * @returns {import('esbuild').BuildOptions}
+ */
 module.exports = function (buildOptions) {
   return {
     ...buildOptions,
