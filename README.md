@@ -15,7 +15,7 @@ It's up to you how you use it!
 
 ## 📮 Support
 
-If you have any plobrem or feedback, please use the [GitHub Issues](https://github.com/ryonakae/figma-plugin-figma-gpt/issues).
+If you have any problem or feedback, please use the [GitHub Issues](https://github.com/ryonakae/figma-plugin-figma-gpt/issues).
 
 ---
 
