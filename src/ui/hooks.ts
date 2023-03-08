@@ -1,4 +1,4 @@
-import { Model, Settings } from '@/types'
+import { ChatModel, CodeModel, Settings } from '@/types'
 import { useStore } from '@/ui/Store'
 
 export function useSettings() {
@@ -6,25 +6,27 @@ export function useSettings() {
     useStore.setState({ ...useStore.getState(), ...keyValue })
   }
 
-  function updateMaxTokens(model: Model, maxTokens: number) {
+  function updateChatMaxTokens(model: ChatModel) {
+    const chatMaxTokens = useStore.getState().chatMaxTokens
+
+    if (chatMaxTokens > 4096) {
+      updateSettings({ chatMaxTokens: 4096 })
+    }
+  }
+
+  function updateCodeMaxTokens(model: CodeModel) {
+    const codeMaxTokens = useStore.getState().codeMaxTokens
+
     if (model === 'code-davinci-002') {
-      if (maxTokens > 8000) {
-        updateSettings({ maxTokens: 8000 })
-      }
-    } else if (model === 'gpt-3.5-turbo' || model === 'gpt-3.5-turbo-0301') {
-      if (maxTokens > 4096) {
-        updateSettings({ maxTokens: 4096 })
-      }
-    } else if (model === 'text-davinci-003') {
-      if (maxTokens > 4000) {
-        updateSettings({ maxTokens: 4000 })
+      if (codeMaxTokens > 8000) {
+        updateSettings({ codeMaxTokens: 8000 })
       }
     } else {
-      if (maxTokens > 2048) {
-        updateSettings({ maxTokens: 2048 })
+      if (codeMaxTokens > 2048) {
+        updateSettings({ codeMaxTokens: 2048 })
       }
     }
   }
 
-  return { updateSettings, updateMaxTokens }
+  return { updateSettings, updateChatMaxTokens, updateCodeMaxTokens }
 }

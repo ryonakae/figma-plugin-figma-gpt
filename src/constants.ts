@@ -8,8 +8,10 @@ export const UI_HEIGHT = 0
 export const DEFAULT_SETTINGS: Settings = {
   apiKey: '',
   chatModel: 'gpt-3.5-turbo',
+  codeModel: 'code-davinci-002',
   temperature: 0.7,
-  maxTokens: 1024,
+  chatMaxTokens: 1024,
+  codeMaxTokens: 1024,
   stop: '',
   topP: 1,
   frequencyPenalty: 0,

@@ -18,7 +18,7 @@ import { css } from '@emotion/react'
 import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import ScrollToBottom from 'react-scroll-to-bottom'
-import { useUpdateEffect } from 'react-use'
+import { useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
 import {
@@ -27,13 +27,13 @@ import {
   OpenAiApiChatRequest,
   OpenAiApiChatResponse,
   OpenAiChatMessage,
-  Model,
+  ChatModel,
 } from '@/types'
 import { useStore } from '@/ui/Store'
 import Message from '@/ui/components/Message'
 import { useSettings } from '@/ui/hooks'
 
-const chatModelOptions: Array<DropdownOption<Model>> = [
+const chatModelOptions: Array<DropdownOption<ChatModel>> = [
   { value: 'gpt-3.5-turbo' },
   { value: 'gpt-3.5-turbo-0301' },
 ]
@@ -45,7 +45,7 @@ export default function Chat() {
   const loadingRef = useRef(false)
   const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
-  const { updateSettings, updateMaxTokens } = useSettings()
+  const { updateSettings, updateChatMaxTokens } = useSettings()
 
   useHotkeys(
     ['meta+enter', 'ctrl+enter'],
@@ -111,7 +111,7 @@ export default function Chat() {
         model: settings.chatModel,
         messages: messages,
         temperature: settings.temperature,
-        max_tokens: settings.maxTokens,
+        max_tokens: settings.chatMaxTokens,
         stop: settings.stop,
         top_p: settings.topP,
         frequency_penalty: settings.frequencyPenalty,
@@ -170,8 +170,16 @@ export default function Chat() {
   }
 
   function onChatModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    updateSettings({ chatModel: event.currentTarget.value as Model })
+    updateSettings({ chatModel: event.currentTarget.value as ChatModel })
   }
+
+  useMount(() => {
+    updateChatMaxTokens(settings.chatModel)
+  })
+
+  useUpdateEffect(() => {
+    updateChatMaxTokens(settings.chatModel)
+  }, [settings.chatModel])
 
   useUpdateEffect(() => {
     const encodedPrompt = encode(settings.chatPrompt)
