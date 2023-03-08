@@ -43,6 +43,11 @@
         "newlines-between": "always"
       }
     ],
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".json", ".ts", ".tsx"]
+      }
+    },
     "jsx-a11y/alt-text": "off",
     "prefer-const": "warn",
     "react/jsx-no-comment-textnodes": "warn",
