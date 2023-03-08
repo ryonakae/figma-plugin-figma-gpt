@@ -1,9 +1,11 @@
-import { JSX } from 'preact'
-import { useState } from 'preact/hooks'
+import { h, JSX } from 'preact'
+import { useRef, useState } from 'preact/hooks'
 
 import {
   Button,
   Divider,
+  Dropdown,
+  DropdownOption,
   Link,
   Muted,
   Text,
@@ -18,27 +20,47 @@ import { useHotkeys } from 'react-hotkeys-hook'
 import ScrollToBottom from 'react-scroll-to-bottom'
 import { useUpdateEffect } from 'react-use'
 
+import { DEFAULT_SETTINGS } from '@/constants'
 import {
   NotifyHandler,
   OpenAiApiError,
   OpenAiApiChatRequest,
   OpenAiApiChatResponse,
+  OpenAiChatMessage,
+  Model,
 } from '@/types'
-import Store from '@/ui/Store'
+import { useStore } from '@/ui/Store'
 import Message from '@/ui/components/Message'
+import { useSettings } from '@/ui/hooks'
+
+const chatModelOptions: Array<DropdownOption<Model>> = [
+  { value: 'gpt-3.5-turbo' },
+  { value: 'gpt-3.5-turbo-0301' },
+]
 
 export default function Chat() {
-  const { settings, setSettings } = Store.useContainer()
+  const settings = useStore()
   const [focusPrompt, setFocusPropmt] = useState(false)
   const [loading, setLoading] = useState(false)
+  const loadingRef = useRef(false)
   const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
+  const { updateSettings, updateMaxTokens } = useSettings()
 
   useHotkeys(
     ['meta+enter', 'ctrl+enter'],
     (event, handler) => {
-      if (!focusPrompt || settings.chatPrompt.length === 0) {
-        console.log('aborted', focusPrompt, settings.chatPrompt.length)
+      if (
+        !focusPrompt ||
+        settings.chatPrompt.length === 0 ||
+        loadingRef.current
+      ) {
+        console.log(
+          'aborted',
+          focusPrompt,
+          settings.chatPrompt.length,
+          loadingRef.current
+        )
         return
       }
 
@@ -61,27 +83,22 @@ export default function Chat() {
   }
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
-    const newValue = event.currentTarget.value
-    setSettings({ ...settings, chatPrompt: newValue })
+    updateSettings({ chatPrompt: event.currentTarget.value })
   }
 
   async function onSubmitClick() {
     setLoading(true)
 
     const prompt = settings.chatPrompt
+    const message: OpenAiChatMessage = {
+      role: 'user',
+      content: prompt,
+    }
+    const messages: OpenAiChatMessage[] = [...settings.chatMessages, message]
 
-    setSettings(current => {
-      return {
-        ...settings,
-        chatMessages: [
-          ...current.chatMessages,
-          {
-            role: 'user',
-            content: prompt,
-          },
-        ],
-        chatPrompt: '',
-      }
+    updateSettings({
+      chatMessages: messages,
+      chatPrompt: '',
     })
 
     fetch('https://api.openai.com/v1/chat/completions', {
@@ -91,8 +108,8 @@ export default function Chat() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.model,
-        messages: [...settings.chatMessages, { role: 'user', content: prompt }],
+        model: settings.chatModel,
+        messages: messages,
         temperature: settings.temperature,
         max_tokens: settings.maxTokens,
         stop: settings.stop,
@@ -114,19 +131,15 @@ export default function Chat() {
         const data = (await response.json()) as OpenAiApiChatResponse
         console.log(data)
 
-        setSettings(current => {
-          return {
-            ...settings,
-            chatMessages: [
-              ...current.chatMessages,
-              {
-                role: 'assistant',
-                content: data.choices[0].message.content.trim(),
-              },
-            ],
-            chatPrompt: '', // なぜかここでもクリアしないと反映されない
-            totalTokens: data.usage.total_tokens,
-          }
+        updateSettings({
+          chatMessages: [
+            ...useStore.getState().chatMessages, // 最新のstateを取ってこないと人間のメッセージが上書きされてしまう
+            {
+              role: 'assistant',
+              content: data.choices[0].message.content.trim(),
+            },
+          ],
+          totalTokens: data.usage.total_tokens,
         })
       })
       .catch((err: Error) => {
@@ -145,16 +158,29 @@ export default function Chat() {
 
   function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
     event.preventDefault()
-    setSettings({ ...settings, chatMessages: [], totalTokens: 0 })
+
+    updateSettings({
+      chatMessages: DEFAULT_SETTINGS.chatMessages,
+      totalTokens: DEFAULT_SETTINGS.totalTokens,
+    })
+
     emit<NotifyHandler>('NOTIFY', {
       message: 'Conversation cleared.',
     })
+  }
+
+  function onChatModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    updateSettings({ chatModel: event.currentTarget.value as Model })
   }
 
   useUpdateEffect(() => {
     const encodedPrompt = encode(settings.chatPrompt)
     setPromptTokens(encodedPrompt.length)
   }, [settings.chatPrompt])
+
+  useUpdateEffect(() => {
+    loadingRef.current = loading
+  }, [loading])
 
   return (
     <div
@@ -286,11 +312,24 @@ export default function Chat() {
           css={css`
             display: flex;
             justify-content: space-between;
+            align-items: center;
           `}
         >
-          <Text>
-            <Muted>Model: {settings.model}</Muted>
-          </Text>
+          <div
+            css={css`
+              width: 150px;
+            `}
+          >
+            <Dropdown
+              onChange={onChatModelChange}
+              options={chatModelOptions}
+              value={settings.chatModel || null}
+              variant="border"
+              style={{
+                justifyContent: 'space-between',
+              }}
+            />
+          </div>
 
           <Text>
             <Muted>

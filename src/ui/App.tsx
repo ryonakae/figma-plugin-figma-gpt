@@ -15,17 +15,17 @@ import {
 } from '@/types'
 import Chat from '@/ui/Chat'
 import Setting from '@/ui/Setting'
-import Store from '@/ui/Store'
-import Text from '@/ui/Text'
+import { useStore } from '@/ui/Store'
+import { useSettings } from '@/ui/hooks'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
-  // { children: <Text />, value: 'Text' },
   { children: <Setting />, value: 'Setting' },
 ]
 
 export default function App() {
-  const { settings, setSettings } = Store.useContainer()
+  const settings = useStore()
+  const { updateSettings } = useSettings()
   const [tabValue, setTabValue] = useState<string | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -51,7 +51,7 @@ export default function App() {
 
   function loadSettings(settings: Settings) {
     console.log('loadSettings', settings)
-    setSettings(settings)
+    updateSettings(settings)
   }
 
   function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {

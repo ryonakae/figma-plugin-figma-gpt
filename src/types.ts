@@ -12,7 +12,7 @@ export type Model =
 
 export type Settings = {
   apiKey: string
-  model: Model
+  chatModel: Model
   temperature: number
   maxTokens: number
   stop: string
@@ -21,7 +21,6 @@ export type Settings = {
   presencePenalty: number
   chatPrompt: string
   chatMessages: OpenAiChatMessage[]
-  textPrompt: string
   totalTokens: number
 }
 

@@ -2,9 +2,6 @@ import { h, JSX } from 'preact'
 
 import {
   Button,
-  Container,
-  Dropdown,
-  DropdownOption,
   Link,
   Muted,
   RangeSlider,
@@ -19,60 +16,41 @@ import { useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
 import { Model, NotifyHandler } from '@/types'
-import Store from '@/ui/Store'
-
-const modelOptions: Array<DropdownOption<Model>> = [
-  { value: 'gpt-3.5-turbo' },
-  { value: 'gpt-3.5-turbo-0301' },
-  // { value: 'text-davinci-003' },
-  // { value: 'text-curie-001' },
-  // { value: 'text-babbage-001' },
-  // { value: 'text-ada-001' },
-  // { value: 'code-davinci-002' },
-  // { value: 'code-cushman-001' },
-]
+import { useStore } from '@/ui/Store'
+import { useSettings } from '@/ui/hooks'
 
 export default function Setting() {
-  const { settings, setSettings } = Store.useContainer()
+  const settings = useStore()
+  const { updateSettings, updateMaxTokens } = useSettings()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, apiKey: event.currentTarget.value })
-  }
-
-  function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, model: event.currentTarget.value as Model })
+    updateSettings({ apiKey: event.currentTarget.value })
   }
 
   function onTemperatureChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, temperature: Number(event.currentTarget.value) })
+    updateSettings({ temperature: Number(event.currentTarget.value) })
   }
 
   function onMaxTokensChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, maxTokens: Number(event.currentTarget.value) })
+    updateSettings({ maxTokens: Number(event.currentTarget.value) })
   }
 
   function onStopInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, stop: event.currentTarget.value })
+    updateSettings({ stop: event.currentTarget.value })
   }
 
   function onTopPChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, topP: Number(event.currentTarget.value) })
+    updateSettings({ topP: Number(event.currentTarget.value) })
   }
 
   function onFrequencyPenaltyChange(
     event: JSX.TargetedEvent<HTMLInputElement>
   ) {
-    setSettings({
-      ...settings,
-      frequencyPenalty: Number(event.currentTarget.value),
-    })
+    updateSettings({ frequencyPenalty: Number(event.currentTarget.value) })
   }
 
   function onPresencePenaltyChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({
-      ...settings,
-      presencePenalty: Number(event.currentTarget.value),
-    })
+    updateSettings({ presencePenalty: Number(event.currentTarget.value) })
   }
 
   function getMaximumLength(model: Model) {
@@ -90,9 +68,8 @@ export default function Setting() {
   }
 
   function onResetClick() {
-    setSettings({
-      ...settings,
-      model: DEFAULT_SETTINGS.model,
+    updateSettings({
+      chatModel: DEFAULT_SETTINGS.chatModel,
       temperature: DEFAULT_SETTINGS.temperature,
       maxTokens: DEFAULT_SETTINGS.maxTokens,
       stop: DEFAULT_SETTINGS.stop,
@@ -108,20 +85,8 @@ export default function Setting() {
 
   // update maxTokens on model & maxTokens change
   useUpdateEffect(() => {
-    if (settings.model === 'code-davinci-002') {
-      if (settings.maxTokens > 8000) {
-        setSettings({ ...settings, maxTokens: 8000 })
-      }
-    } else if (settings.model === 'text-davinci-003') {
-      if (settings.maxTokens > 4000) {
-        setSettings({ ...settings, maxTokens: 4000 })
-      }
-    } else {
-      if (settings.maxTokens > 2048) {
-        setSettings({ ...settings, maxTokens: 2048 })
-      }
-    }
-  }, [settings.model, settings.maxTokens])
+    updateMaxTokens(settings.chatModel, settings.maxTokens)
+  }, [settings.chatModel, settings.maxTokens])
 
   return (
     <div
@@ -170,20 +135,6 @@ export default function Setting() {
 
       <VerticalSpace space="medium" />
 
-      {/* model */}
-      <Text>
-        <Muted>Model</Muted>
-      </Text>
-      <VerticalSpace space="extraSmall" />
-      <Dropdown
-        onChange={onModelChange}
-        options={modelOptions}
-        value={settings.model || null}
-        variant="border"
-      />
-
-      <VerticalSpace space="extraSmall" />
-
       {/* temperature */}
       <div className="parameterTitle withRangeSlider">
         <Text>
@@ -218,7 +169,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaximumLength(settings.model)}
+        maximum={getMaximumLength(settings.chatModel)}
         minimum={0}
         value={String(settings.maxTokens)}
         onChange={onMaxTokensChange}

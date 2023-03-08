@@ -11,7 +11,7 @@
     "react-hotkeys-hook": "^4.3.7",
     "react-scroll-to-bottom": "^4.2.0",
     "react-use": "^17.4.0",
-    "unstated-next": "^1.1.0"
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "^2.2.0",
