@@ -1,4 +1,5 @@
-import { h, JSX } from 'preact'
+/** @jsx h */
+import { h, Fragment, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
 import { Tabs, TabsOption } from '@create-figma-plugin/ui'
@@ -75,7 +76,7 @@ export default function App() {
   }, [tabValue])
 
   return (
-    <>
+    <Fragment>
       <Global
         styles={css`
           :root {
@@ -105,6 +106,6 @@ export default function App() {
       <div ref={wrapperRef}>
         <Tabs onChange={onTabChange} options={tabOptions} value={tabValue} />
       </div>
-    </>
+    </Fragment>
   )
 }

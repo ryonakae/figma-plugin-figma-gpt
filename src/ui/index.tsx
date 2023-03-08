@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h } from 'preact'
 
 import { render } from '@create-figma-plugin/ui'
@@ -8,4 +9,4 @@ function Plugin() {
   return <App />
 }
 
-export default render(Plugin as any)
+export default render(Plugin)

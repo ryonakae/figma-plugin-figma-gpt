@@ -51,9 +51,6 @@
     "react/react-in-jsx-scope": "off"
   },
   "settings": {
-    "react": {
-      "pragma": "h"
-    },
     "import/resolver": {
       "typescript": {
         "alwaysTryTypes": true

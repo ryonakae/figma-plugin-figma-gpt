@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, JSX } from 'preact'
 
 import { Link, Muted, Text } from '@create-figma-plugin/ui'

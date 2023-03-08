@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, JSX, ComponentProps } from 'preact'
 import { useState } from 'preact/hooks'
 

@@ -1,4 +1,5 @@
-import { h, JSX } from 'preact'
+/** @jsx h */
+import { h, JSX, Fragment } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
 import {
@@ -116,7 +117,7 @@ export default function Prompt({ type }: PromptProps) {
   }, [loading])
 
   return (
-    <>
+    <Fragment>
       <Divider />
 
       <div
@@ -224,6 +225,6 @@ export default function Prompt({ type }: PromptProps) {
           </Text>
         </div>
       </div>
-    </>
+    </Fragment>
   )
 }
