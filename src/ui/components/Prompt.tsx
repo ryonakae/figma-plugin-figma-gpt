@@ -12,21 +12,12 @@ import {
   DropdownOption,
   Text,
 } from '@create-figma-plugin/ui'
-import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
-import {
-  ChatModel,
-  CodeModel,
-  NotifyHandler,
-  OpenAiApiChatRequest,
-  OpenAiApiChatResponse,
-  OpenAiApiError,
-  OpenAiChatMessage,
-} from '@/types'
+import { ChatModel, CodeModel } from '@/types'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 import useCompletion from '@/ui/hooks/useCompletion'
