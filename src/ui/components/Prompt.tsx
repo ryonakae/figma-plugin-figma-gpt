@@ -45,7 +45,37 @@ export default function Prompt({ type }: PromptProps) {
   const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
   const { updateSettings } = useSettings()
-  const { chatCompletion } = useCompletion()
+  const { chatCompletion, codeCompletion } = useCompletion()
+
+  function getPromptValue() {
+    if (type === 'chat') {
+      return settings.chatPrompt
+    } else if (type === 'code') {
+      return settings.codePrompt
+    } else {
+      return ''
+    }
+  }
+
+  function getButtonDisabled() {
+    if (type === 'chat') {
+      return loading || !settings.apiKey || settings.chatPrompt.length === 0
+    } else if (type === 'code') {
+      return loading || !settings.apiKey || settings.codePrompt.length === 0
+    } else {
+      return false
+    }
+  }
+
+  function getTotalTokens() {
+    if (type === 'chat') {
+      return settings.chatTotalTokens
+    } else if (type === 'code') {
+      return settings.codeTotalTokens
+    } else {
+      return ''
+    }
+  }
 
   function onPromptFocus() {
     console.log('onPromptFocus')
@@ -61,7 +91,7 @@ export default function Prompt({ type }: PromptProps) {
     if (type === 'chat') {
       updateSettings({ chatPrompt: event.currentTarget.value })
     } else if (type === 'code') {
-      // updateSettings({ chatPrompt: event.currentTarget.value })
+      updateSettings({ codePrompt: event.currentTarget.value })
     }
   }
 
@@ -77,7 +107,7 @@ export default function Prompt({ type }: PromptProps) {
     if (type === 'chat') {
       chatCompletion(setLoading)
     } else if (type === 'code') {
-      // codeCompletion()
+      codeCompletion(setLoading)
     }
   }
 
@@ -134,9 +164,12 @@ export default function Prompt({ type }: PromptProps) {
           {/* textarea */}
           <div
             css={css`
-              textarea {
-                padding-right: 95px;
-                min-height: 48px;
+              & > div {
+                div:first-of-type,
+                textarea {
+                  padding-right: 88px;
+                  min-height: 48px;
+                }
               }
             `}
             onFocus={onPromptFocus}
@@ -146,7 +179,7 @@ export default function Prompt({ type }: PromptProps) {
               {...initialFocus}
               variant="border"
               grow
-              value={settings.chatPrompt}
+              value={getPromptValue()}
               onInput={onPromptInput}
               rows={1}
             />
@@ -158,14 +191,14 @@ export default function Prompt({ type }: PromptProps) {
               position: absolute;
               right: var(--space-extra-small);
               bottom: var(--space-extra-small);
+              width: 72px;
             `}
           >
             <Button
+              fullWidth
               onClick={onSubmitClick}
               loading={loading}
-              disabled={
-                loading || !settings.apiKey || settings.chatPrompt.length === 0
-              }
+              disabled={getButtonDisabled()}
             >
               Submit
             </Button>
@@ -184,7 +217,7 @@ export default function Prompt({ type }: PromptProps) {
         >
           <div
             css={css`
-              width: 150px;
+              width: 144px;
             `}
           >
             {type === 'chat' && (
@@ -216,10 +249,13 @@ export default function Prompt({ type }: PromptProps) {
               <span
                 css={css`
                   font-variant-numeric: tabular-nums;
+                  display: flex;
+                  gap: var(--space-extra-small);
                 `}
               >
-                Prompt: {promptTokens} tokens / Total: {settings.totalTokens}{' '}
-                tokens
+                <span>Prompt: {promptTokens} tokens</span>
+                <span>/</span>
+                <span>Total: {getTotalTokens()}</span>
               </span>
             </Muted>
           </Text>

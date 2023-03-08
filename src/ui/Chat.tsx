@@ -22,7 +22,7 @@ export default function Chat() {
 
     updateSettings({
       chatMessages: DEFAULT_SETTINGS.chatMessages,
-      totalTokens: DEFAULT_SETTINGS.totalTokens,
+      chatTotalTokens: DEFAULT_SETTINGS.chatTotalTokens,
     })
 
     emit<NotifyHandler>('NOTIFY', {

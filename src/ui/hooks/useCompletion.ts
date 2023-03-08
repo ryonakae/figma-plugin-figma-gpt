@@ -69,7 +69,7 @@ export default function useCompletion() {
               content: data.choices[0].message.content.trim(),
             },
           ],
-          totalTokens: data.usage.total_tokens,
+          chatTotalTokens: data.usage.total_tokens,
         })
       })
       .catch((err: Error) => {
@@ -86,5 +86,9 @@ export default function useCompletion() {
       })
   }
 
-  return { chatCompletion }
+  async function codeCompletion(setLoading: StateUpdater<boolean>) {
+    console.log('codeCompletion')
+  }
+
+  return { chatCompletion, codeCompletion }
 }

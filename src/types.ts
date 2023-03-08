@@ -10,19 +10,26 @@ export type TextModel =
 export type Model = ChatModel | CodeModel | TextModel
 
 export type Settings = {
+  // common
   apiKey: string
-  chatModel: ChatModel
-  codeModel: CodeModel
   temperature: number
-  chatMaxTokens: number
-  codeMaxTokens: number
-  stop: string
   topP: number
   frequencyPenalty: number
   presencePenalty: number
+  stop: string
+
+  // chat
+  chatModel: ChatModel
+  chatMaxTokens: number
   chatPrompt: string
   chatMessages: OpenAiChatMessage[]
-  totalTokens: number
+  chatTotalTokens: number
+
+  // code
+  codeModel: CodeModel
+  codeMaxTokens: number
+  codePrompt: string
+  codeTotalTokens: number
 }
 
 export interface LoadSettingsHandler extends EventHandler {

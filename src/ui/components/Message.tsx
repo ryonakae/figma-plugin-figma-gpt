@@ -89,7 +89,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           <img
             src={Icon}
             css={css`
-              width: 20px;
+              width: 18px;
               height: auto;
               mix-blend-mode: exclusion;
             `}

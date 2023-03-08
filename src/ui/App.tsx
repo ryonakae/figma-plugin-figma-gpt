@@ -15,12 +15,14 @@ import {
   SaveSettingsHandler,
 } from '@/types'
 import Chat from '@/ui/Chat'
+import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
+  { children: <Code />, value: 'Code' },
   { children: <Setting />, value: 'Setting' },
 ]
 
@@ -89,12 +91,12 @@ export default function App() {
             align-items: center;
 
             &.withRangeSlider {
-              margin-bottom: -5px;
+              margin-bottom: -4px;
             }
           }
 
           .parameterTitleInput {
-            width: 45px;
+            width: 48px;
 
             & input {
               text-align: right;
