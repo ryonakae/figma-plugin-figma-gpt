@@ -1,7 +1,7 @@
 import { ChatModel, CodeModel, Settings } from '@/types'
 import { useStore } from '@/ui/Store'
 
-export function useSettings() {
+export default function useSettings() {
   function updateSettings(keyValue: { [T in keyof Settings]?: Settings[T] }) {
     useStore.setState({ ...useStore.getState(), ...keyValue })
   }

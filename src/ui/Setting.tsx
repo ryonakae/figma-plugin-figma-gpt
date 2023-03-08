@@ -21,7 +21,8 @@ import { useSettings } from '@/ui/hooks'
 
 export default function Setting() {
   const settings = useStore()
-  const { updateSettings, updateChatMaxTokens } = useSettings()
+  const { updateSettings, updateChatMaxTokens, updateCodeMaxTokens } =
+    useSettings()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
     updateSettings({ apiKey: event.currentTarget.value })
@@ -91,11 +92,13 @@ export default function Setting() {
 
   useMount(() => {
     updateChatMaxTokens(settings.chatModel)
+    updateCodeMaxTokens(settings.codeModel)
   })
 
   useUpdateEffect(() => {
     updateChatMaxTokens(settings.chatModel)
-  }, [settings.chatModel])
+    updateCodeMaxTokens(settings.codeModel)
+  }, [settings.chatModel, settings.codeModel])
 
   return (
     <div
