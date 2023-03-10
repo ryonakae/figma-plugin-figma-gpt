@@ -29,6 +29,7 @@ export type Settings = {
   codeModel: CodeModel
   codeMaxTokens: number
   codePrompt: string
+  codeResult: string
   codeTotalTokens: number
 }
 

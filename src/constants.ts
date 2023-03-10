@@ -1,3 +1,5 @@
+import * as monaco from 'monaco-editor'
+
 import { Settings } from '@/types'
 
 export const SETTINGS_KEY = 'figma-gpt'
@@ -25,5 +27,37 @@ export const DEFAULT_SETTINGS: Settings = {
   codeModel: 'code-davinci-002',
   codeMaxTokens: 1024,
   codePrompt: '',
+  codeResult: '',
   codeTotalTokens: 0,
 }
+
+export const EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions =
+  {
+    cursorBlinking: 'smooth',
+    folding: false,
+    fontFamily: 'Menlo, Monaco, "Courier New", monospace',
+    fontSize: 11,
+    fontWeight: '400',
+    lineHeight: 17.6,
+    formatOnPaste: true,
+    formatOnType: true,
+    glyphMargin: true,
+    lineDecorationsWidth: 0,
+    lineNumbers: 'off',
+    lineNumbersMinChars: 0,
+    matchBrackets: 'near',
+    minimap: {
+      enabled: false,
+    },
+    padding: {
+      top: 15,
+      bottom: 15,
+    },
+    renderWhitespace: 'boundary',
+    scrollBeyondLastColumn: 0,
+    scrollBeyondLastLine: false,
+    selectionHighlight: false,
+    suggestLineHeight: 16.5,
+    tabSize: 2,
+    wordWrap: 'bounded',
+  }
