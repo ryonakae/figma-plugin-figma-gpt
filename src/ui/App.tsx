@@ -1,4 +1,5 @@
-import { h, JSX } from 'preact'
+/** @jsx h */
+import { h, Fragment, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
 import { Tabs, TabsOption } from '@create-figma-plugin/ui'
@@ -7,25 +8,27 @@ import { css, Global } from '@emotion/react'
 import { useMount, useUpdateEffect } from 'react-use'
 
 import { UI_HEIGHT, UI_WIDTH } from '@/constants'
+import { Settings } from '@/types/common'
 import {
   ResizeWindowHandler,
-  LoadSettingsHandler,
-  Settings,
   SaveSettingsHandler,
-} from '@/types'
+  LoadSettingsHandler,
+} from '@/types/eventHandler'
 import Chat from '@/ui/Chat'
+import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
-import Store from '@/ui/Store'
-import Text from '@/ui/Text'
+import { useStore } from '@/ui/Store'
+import { useSettings } from '@/ui/hooks'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
-  // { children: <Text />, value: 'Text' },
+  { children: <Code />, value: 'Code' },
   { children: <Setting />, value: 'Setting' },
 ]
 
 export default function App() {
-  const { settings, setSettings } = Store.useContainer()
+  const settings = useStore()
+  const { updateSettings } = useSettings()
   const [tabValue, setTabValue] = useState<string | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
@@ -51,16 +54,25 @@ export default function App() {
 
   function loadSettings(settings: Settings) {
     console.log('loadSettings', settings)
-    setSettings(settings)
+    updateSettings(settings)
+    setTabValue(settings.lastOpenTab)
   }
 
   function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setTabValue(event.currentTarget.value)
+    const tabValue = event.currentTarget.value
+    updateSettings({ lastOpenTab: tabValue })
+    setTabValue(tabValue)
+  }
+
+  function loadExternalScript() {
+    const script = document.createElement('script')
+    script.src =
+      'https://wonderful-newton-c6b380.netlify.app/typescript/typescriptServices.min.js'
+    document.body.appendChild(script)
   }
 
   useMount(() => {
-    setTabValue(tabOptions[0].value)
-    resizeWindow()
+    loadExternalScript()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
     })
@@ -75,7 +87,7 @@ export default function App() {
   }, [tabValue])
 
   return (
-    <>
+    <Fragment>
       <Global
         styles={css`
           :root {
@@ -88,12 +100,12 @@ export default function App() {
             align-items: center;
 
             &.withRangeSlider {
-              margin-bottom: -5px;
+              margin-bottom: -4px;
             }
           }
 
           .parameterTitleInput {
-            width: 45px;
+            width: 48px;
 
             & input {
               text-align: right;
@@ -105,6 +117,6 @@ export default function App() {
       <div ref={wrapperRef}>
         <Tabs onChange={onTabChange} options={tabOptions} value={tabValue} />
       </div>
-    </>
+    </Fragment>
   )
 }

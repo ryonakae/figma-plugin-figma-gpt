@@ -1,3 +1,4 @@
+/** @jsx h */
 import { h, JSX, ComponentProps } from 'preact'
 import { useState } from 'preact/hooks'
 
@@ -6,7 +7,8 @@ import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
-import { NotifyHandler, OpenAiChatMessage } from '@/types'
+import { OpenAiChatMessage } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
 
 type MessageProps = ComponentProps<'div'> & OpenAiChatMessage
@@ -88,7 +90,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           <img
             src={Icon}
             css={css`
-              width: 20px;
+              width: 18px;
               height: auto;
               mix-blend-mode: exclusion;
             `}

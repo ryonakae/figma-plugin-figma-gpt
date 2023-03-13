@@ -1,17 +1,6 @@
-import { useState } from 'preact/hooks'
-
-import { createContainer } from 'unstated-next'
+import { create } from 'zustand'
 
 import { DEFAULT_SETTINGS } from '@/constants'
-import { Settings } from '@/types'
+import { Settings } from '@/types/common'
 
-function Store() {
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
-
-  return {
-    settings,
-    setSettings,
-  }
-}
-
-export default createContainer(Store)
+export const useStore = create<Settings>(set => DEFAULT_SETTINGS)

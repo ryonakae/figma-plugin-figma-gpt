@@ -13,7 +13,7 @@
     "skipLibCheck": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@emotion/react",
-    "jsxFactory": null
+    "jsxFactory": ""
   },
   "include": ["src"],
   "exclude": ["node_modules", "build"]

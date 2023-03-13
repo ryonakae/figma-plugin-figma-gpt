@@ -6,20 +6,24 @@
     "@create-figma-plugin/ui": "^2.2.0",
     "@create-figma-plugin/utilities": "^2.2.0",
     "@emotion/react": "^11.10.6",
+    "@monaco-editor/react": "^4.4.6",
     "gpt-3-encoder": "latitudegames/GPT-3-Encoder#pull/33/head",
+    "monaco-editor": "^0.36.1",
     "preact": ">=10",
     "react-hotkeys-hook": "^4.3.7",
     "react-scroll-to-bottom": "^4.2.0",
     "react-use": "^17.4.0",
-    "unstated-next": "^1.1.0"
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@create-figma-plugin/build": "^2.2.0",
     "@create-figma-plugin/tsconfig": "^2.2.0",
     "@figma/plugin-typings": "1.57.1",
+    "@types/lodash": "^4.14.191",
     "@types/react-scroll-to-bottom": "^4.2.0",
     "@typescript-eslint/eslint-plugin": "^5.9.0",
     "@typescript-eslint/parser": "^5.9.0",
+    "dts-generator": "^3.0.0",
     "eslint": "^8.6.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-import-resolver-typescript": "^2.5.0",
@@ -27,13 +31,15 @@
     "eslint-plugin-react": "^7.28.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.5",
+    "lodash": "^4.17.21",
     "prettier": "^2.5.1",
     "typescript": ">=4"
   },
   "license": "MIT",
   "figma-plugin": {
     "editorType": [
-      "figma"
+      "figma",
+      "figjam"
     ],
     "id": "1213050091855586023",
     "name": "Figma GPT",
@@ -59,6 +65,7 @@
     "lint:eslint": "eslint --ext .ts,.tsx . --ignore-path .gitignore",
     "lint:prettier": "prettier --check . --ignore-path .gitignore",
     "typecheck": "tsc --noEmit",
-    "watch": "build-figma-plugin --typecheck --watch"
+    "watch": "build-figma-plugin --typecheck --watch",
+    "generate-figma-dts": "dts-generator --project node_modules/@figma/plugin-typings --out src/ui/assets/types/figma.dts"
   }
 }

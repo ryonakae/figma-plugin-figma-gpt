@@ -1,10 +1,8 @@
+/** @jsx h */
 import { h, JSX } from 'preact'
 
 import {
   Button,
-  Container,
-  Dropdown,
-  DropdownOption,
   Link,
   Muted,
   RangeSlider,
@@ -15,64 +13,51 @@ import {
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import { useUpdateEffect } from 'react-use'
+import { useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
-import { Model, NotifyHandler } from '@/types'
-import Store from '@/ui/Store'
-
-const modelOptions: Array<DropdownOption<Model>> = [
-  { value: 'gpt-3.5-turbo' },
-  { value: 'gpt-3.5-turbo-0301' },
-  // { value: 'text-davinci-003' },
-  // { value: 'text-curie-001' },
-  // { value: 'text-babbage-001' },
-  // { value: 'text-ada-001' },
-  // { value: 'code-davinci-002' },
-  // { value: 'code-cushman-001' },
-]
+import { Model } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
+import { useStore } from '@/ui/Store'
+import { useSettings } from '@/ui/hooks'
 
 export default function Setting() {
-  const { settings, setSettings } = Store.useContainer()
+  const settings = useStore()
+  const { updateSettings, updateChatMaxTokens, updateCodeMaxTokens } =
+    useSettings()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, apiKey: event.currentTarget.value })
-  }
-
-  function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, model: event.currentTarget.value as Model })
+    updateSettings({ apiKey: event.currentTarget.value })
   }
 
   function onTemperatureChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, temperature: Number(event.currentTarget.value) })
+    updateSettings({ temperature: Number(event.currentTarget.value) })
   }
 
-  function onMaxTokensChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, maxTokens: Number(event.currentTarget.value) })
+  function onChatMaxTokensChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    updateSettings({ chatMaxTokens: Number(event.currentTarget.value) })
+  }
+
+  function onCodeMaxTokensChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    updateSettings({ codeMaxTokens: Number(event.currentTarget.value) })
   }
 
   function onStopInput(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, stop: event.currentTarget.value })
+    updateSettings({ stop: event.currentTarget.value })
   }
 
   function onTopPChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({ ...settings, topP: Number(event.currentTarget.value) })
+    updateSettings({ topP: Number(event.currentTarget.value) })
   }
 
   function onFrequencyPenaltyChange(
     event: JSX.TargetedEvent<HTMLInputElement>
   ) {
-    setSettings({
-      ...settings,
-      frequencyPenalty: Number(event.currentTarget.value),
-    })
+    updateSettings({ frequencyPenalty: Number(event.currentTarget.value) })
   }
 
   function onPresencePenaltyChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setSettings({
-      ...settings,
-      presencePenalty: Number(event.currentTarget.value),
-    })
+    updateSettings({ presencePenalty: Number(event.currentTarget.value) })
   }
 
   function getMaximumLength(model: Model) {
@@ -80,6 +65,8 @@ export default function Setting() {
 
     if (model === 'code-davinci-002') {
       length = 8000
+    } else if (model === 'gpt-3.5-turbo' || model === 'gpt-3.5-turbo-0301') {
+      length = 4096
     } else if (model === 'text-davinci-003') {
       length = 4000
     } else {
@@ -90,11 +77,10 @@ export default function Setting() {
   }
 
   function onResetClick() {
-    setSettings({
-      ...settings,
-      model: DEFAULT_SETTINGS.model,
+    updateSettings({
       temperature: DEFAULT_SETTINGS.temperature,
-      maxTokens: DEFAULT_SETTINGS.maxTokens,
+      chatMaxTokens: DEFAULT_SETTINGS.chatMaxTokens,
+      codeMaxTokens: DEFAULT_SETTINGS.codeMaxTokens,
       stop: DEFAULT_SETTINGS.stop,
       topP: DEFAULT_SETTINGS.topP,
       frequencyPenalty: DEFAULT_SETTINGS.frequencyPenalty,
@@ -106,22 +92,15 @@ export default function Setting() {
     })
   }
 
-  // update maxTokens on model & maxTokens change
+  useMount(() => {
+    updateChatMaxTokens(settings.chatModel)
+    updateCodeMaxTokens(settings.codeModel)
+  })
+
   useUpdateEffect(() => {
-    if (settings.model === 'code-davinci-002') {
-      if (settings.maxTokens > 8000) {
-        setSettings({ ...settings, maxTokens: 8000 })
-      }
-    } else if (settings.model === 'text-davinci-003') {
-      if (settings.maxTokens > 4000) {
-        setSettings({ ...settings, maxTokens: 4000 })
-      }
-    } else {
-      if (settings.maxTokens > 2048) {
-        setSettings({ ...settings, maxTokens: 2048 })
-      }
-    }
-  }, [settings.model, settings.maxTokens])
+    updateChatMaxTokens(settings.chatModel)
+    updateCodeMaxTokens(settings.codeModel)
+  }, [settings.chatModel, settings.codeModel])
 
   return (
     <div
@@ -160,7 +139,7 @@ export default function Setting() {
         </Text>
         <Text>
           <Link
-            href="https://platform.openai.com/docs/api-reference/chat"
+            href="https://platform.openai.com/docs/api-reference/completions/create"
             target="_blank"
           >
             Documentation
@@ -170,19 +149,45 @@ export default function Setting() {
 
       <VerticalSpace space="medium" />
 
-      {/* model */}
-      <Text>
-        <Muted>Model</Muted>
-      </Text>
-      <VerticalSpace space="extraSmall" />
-      <Dropdown
-        onChange={onModelChange}
-        options={modelOptions}
-        value={settings.model || null}
-        variant="border"
+      {/* maximum length (chat) */}
+      <div className="parameterTitle withRangeSlider">
+        <Text>
+          <Muted>Maximum length (Chat)</Muted>
+        </Text>
+        <div className="parameterTitleInput">
+          <TextboxNumeric
+            value={String(settings.chatMaxTokens)}
+            onInput={onChatMaxTokensChange}
+          />
+        </div>
+      </div>
+      <RangeSlider
+        increment={1}
+        maximum={getMaximumLength(settings.chatModel)}
+        minimum={0}
+        value={String(settings.chatMaxTokens)}
+        onChange={onChatMaxTokensChange}
       />
 
-      <VerticalSpace space="extraSmall" />
+      {/* maximum length (code) */}
+      <div className="parameterTitle withRangeSlider">
+        <Text>
+          <Muted>Maximum length (Code)</Muted>
+        </Text>
+        <div className="parameterTitleInput">
+          <TextboxNumeric
+            value={String(settings.codeMaxTokens)}
+            onInput={onCodeMaxTokensChange}
+          />
+        </div>
+      </div>
+      <RangeSlider
+        increment={1}
+        maximum={getMaximumLength(settings.codeModel)}
+        minimum={0}
+        value={String(settings.codeMaxTokens)}
+        onChange={onCodeMaxTokensChange}
+      />
 
       {/* temperature */}
       <div className="parameterTitle withRangeSlider">
@@ -203,37 +208,6 @@ export default function Setting() {
         value={String(settings.temperature)}
         onChange={onTemperatureChange}
       />
-
-      {/* maximum length */}
-      <div className="parameterTitle withRangeSlider">
-        <Text>
-          <Muted>Maximum length</Muted>
-        </Text>
-        <div className="parameterTitleInput">
-          <TextboxNumeric
-            value={String(settings.maxTokens)}
-            onInput={onMaxTokensChange}
-          />
-        </div>
-      </div>
-      <RangeSlider
-        increment={1}
-        maximum={getMaximumLength(settings.model)}
-        minimum={0}
-        value={String(settings.maxTokens)}
-        onChange={onMaxTokensChange}
-      />
-
-      <VerticalSpace space="extraSmall" />
-
-      {/* stop sequences */}
-      <Text>
-        <Muted>Stop sequences</Muted>
-      </Text>
-      <VerticalSpace space="extraSmall" />
-      <Textbox variant="border" value={settings.stop} onInput={onStopInput} />
-
-      <VerticalSpace space="extraSmall" />
 
       {/* top p */}
       <div className="parameterTitle withRangeSlider">
@@ -296,6 +270,15 @@ export default function Setting() {
       />
 
       <VerticalSpace space="extraSmall" />
+
+      {/* stop sequences */}
+      <Text>
+        <Muted>Stop sequences</Muted>
+      </Text>
+      <VerticalSpace space="extraSmall" />
+      <Textbox variant="border" value={settings.stop} onInput={onStopInput} />
+
+      <VerticalSpace space="medium" />
 
       {/* reset button */}
       <Button fullWidth secondary onClick={onResetClick}>
