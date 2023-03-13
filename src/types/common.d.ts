@@ -9,6 +9,7 @@ export type Model = ChatModel | CodeModel | TextModel
 
 export type Settings = {
   // common
+  lastOpenTab: string
   apiKey: string
   temperature: number
   topP: number

@@ -1,8 +1,8 @@
 /** @jsx h */
-import { h } from 'preact'
+import { h, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
-import { Button } from '@create-figma-plugin/ui'
+import { Button, Link, Text } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
@@ -14,7 +14,11 @@ import {
   useUpdateEffect,
 } from 'react-use'
 
-import { CODE_EDITOR_DEFAULT_OPTIONS, CODE_EDITOR_CDN_URL } from '@/constants'
+import {
+  CODE_EDITOR_DEFAULT_OPTIONS,
+  CODE_EDITOR_CDN_URL,
+  DEFAULT_SETTINGS,
+} from '@/constants'
 import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
@@ -87,6 +91,12 @@ export default function Code() {
     // テーマの更新
     updateTheme(document.documentElement)
 
+    // キーボードショートカットの設定
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, handler => {
+      console.log('CodeEditor cmd + enter pressed at inner of editor', handler)
+      exec()
+    })
+
     setEditorMounted(true)
   }
 
@@ -157,6 +167,19 @@ export default function Code() {
     }
   }
 
+  function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+
+    updateSettings({
+      codeResult: DEFAULT_SETTINGS.codeResult,
+      codeTotalTokens: DEFAULT_SETTINGS.codeTotalTokens,
+    })
+
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Code cleared.',
+    })
+  }
+
   useMount(() => {
     observerRef.current = new MutationObserver(onHtmlClassNameChange)
     observerRef.current.observe(document.documentElement, {
@@ -212,11 +235,46 @@ export default function Code() {
           css={css`
             display: flex;
             gap: var(--space-extra-small);
+            align-items: center;
             position: absolute;
-            right: calc(var(--space-medium) + var(--space-extra-small));
-            bottom: var(--space-extra-small);
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            padding-left: var(--space-medium);
+            padding-right: calc(var(--space-medium) + var(--space-extra-small));
+            padding-bottom: var(--space-extra-small);
           `}
         >
+          {/* clear button */}
+          {settings.codeResult.length > 0 && (
+            <Text>
+              <Link href="#" onClick={onClearClick}>
+                Clear code
+              </Link>
+            </Text>
+          )}
+
+          {/* spacer */}
+          <div
+            css={css`
+              flex: 1;
+            `}
+          />
+
+          {/* error count */}
+          {error.length > 0 && (
+            <Text>
+              <span
+                css={css`
+                  font-variant-numeric: tabular-nums;
+                  color: var(--figma-color-text-danger);
+                `}
+              >
+                {error.length} problems
+              </span>
+            </Text>
+          )}
+
           {/* copy button */}
           <Button
             secondary

@@ -1,7 +1,9 @@
 import { StateUpdater } from 'preact/hooks'
 
 import { emit } from '@create-figma-plugin/utilities'
+import { dropRight } from 'lodash'
 
+import { DEFAULT_SETTINGS } from '@/constants'
 import {
   OpenAiApiChatRequest,
   OpenAiApiChatResponse,
@@ -30,7 +32,6 @@ export default function useCompletion() {
 
     updateSettings({
       chatMessages: messages,
-      chatPrompt: '',
     })
 
     fetch('https://api.openai.com/v1/chat/completions', {
@@ -55,6 +56,12 @@ export default function useCompletion() {
         if (!response.ok) {
           console.error('response.ok:', response.ok)
           console.error('response.status:', response.status)
+
+          // chatMessagesの最後の要素（リクエスト前に追加したメッセージ）を削除
+          updateSettings({
+            chatMessages: dropRight(useStore.getState().chatMessages),
+          })
+
           const data = (await response.json()) as OpenAiApiError
           throw new Error(data.error.message) // 以降の処理は中断される
         }
@@ -64,6 +71,7 @@ export default function useCompletion() {
         console.log(data)
 
         updateSettings({
+          chatPrompt: DEFAULT_SETTINGS.chatPrompt, // promptをクリア
           chatMessages: [
             ...useStore.getState().chatMessages, // 最新のstateを取ってこないと人間のメッセージが上書きされてしまう
             {
@@ -91,11 +99,7 @@ export default function useCompletion() {
   async function codeCompletion(setLoading: StateUpdater<boolean>) {
     setLoading(true)
 
-    const prompt = `// ${settings.codePrompt}`
-
-    updateSettings({
-      codePrompt: '',
-    })
+    const prompt = settings.codePrompt
 
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
@@ -120,12 +124,6 @@ export default function useCompletion() {
         if (!response.ok) {
           console.error('response.ok:', response.ok)
           console.error('response.status:', response.status)
-
-          // 一度消したpromptを復活させる
-          updateSettings({
-            codePrompt: prompt,
-          })
-
           const data = (await response.json()) as OpenAiApiError
           throw new Error(data.error.message) // 以降の処理は中断される
         }
@@ -135,6 +133,7 @@ export default function useCompletion() {
         console.log(data)
 
         updateSettings({
+          codePrompt: DEFAULT_SETTINGS.codePrompt, // promptをクリア
           codeResult: data.choices[0].text.trim(),
           codeTotalTokens: data.usage.total_tokens,
         })

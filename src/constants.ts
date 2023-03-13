@@ -9,6 +9,7 @@ export const UI_HEIGHT = 0
 
 export const DEFAULT_SETTINGS: Settings = {
   // common
+  lastOpenTab: 'Chat',
   apiKey: '',
   temperature: 0.7,
   topP: 1,
@@ -54,8 +55,6 @@ export const CODE_EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstru
       bottom: 15,
     },
     renderWhitespace: 'boundary',
-    scrollBeyondLastColumn: 0,
-    scrollBeyondLastLine: false,
     selectionHighlight: false,
     suggestLineHeight: 16.5,
     tabSize: 2,

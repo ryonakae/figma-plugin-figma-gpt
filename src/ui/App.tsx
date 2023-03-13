@@ -55,10 +55,13 @@ export default function App() {
   function loadSettings(settings: Settings) {
     console.log('loadSettings', settings)
     updateSettings(settings)
+    setTabValue(settings.lastOpenTab)
   }
 
   function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    setTabValue(event.currentTarget.value)
+    const tabValue = event.currentTarget.value
+    updateSettings({ lastOpenTab: tabValue })
+    setTabValue(tabValue)
   }
 
   function loadExternalScript() {
@@ -69,8 +72,6 @@ export default function App() {
   }
 
   useMount(() => {
-    setTabValue(tabOptions[0].value)
-    resizeWindow()
     loadExternalScript()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)

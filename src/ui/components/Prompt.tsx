@@ -47,6 +47,16 @@ export default function Prompt({ type }: PromptProps) {
   const { updateSettings } = useSettings()
   const { chatCompletion, codeCompletion } = useCompletion()
 
+  function getPromptPlaceholder() {
+    if (type === 'chat') {
+      return 'Think of a tagline for the corporate website.'
+    } else if (type === 'code') {
+      return '/* Create 10 random-sized rectangles using Figma Plugin API. */'
+    } else {
+      return ''
+    }
+  }
+
   function getPromptValue() {
     if (type === 'chat') {
       return settings.chatPrompt
@@ -185,6 +195,8 @@ export default function Prompt({ type }: PromptProps) {
               value={getPromptValue()}
               onInput={onPromptInput}
               rows={1}
+              disabled={loading}
+              placeholder={getPromptPlaceholder()}
             />
           </div>
 
@@ -253,12 +265,12 @@ export default function Prompt({ type }: PromptProps) {
                 css={css`
                   font-variant-numeric: tabular-nums;
                   display: flex;
-                  gap: var(--space-extra-small);
+                  gap: 0.5em;
                 `}
               >
                 <span>Prompt: {promptTokens} tokens</span>
                 <span>/</span>
-                <span>Total: {getTotalTokens()}</span>
+                <span>Total: {getTotalTokens()} tokens</span>
               </span>
             </Muted>
           </Text>

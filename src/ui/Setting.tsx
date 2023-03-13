@@ -139,7 +139,7 @@ export default function Setting() {
         </Text>
         <Text>
           <Link
-            href="https://platform.openai.com/docs/api-reference/chat"
+            href="https://platform.openai.com/docs/api-reference/completions/create"
             target="_blank"
           >
             Documentation
