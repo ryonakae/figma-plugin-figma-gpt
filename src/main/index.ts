@@ -13,14 +13,14 @@ import {
   UI_HEIGHT,
   UI_WIDTH,
 } from '@/constants'
+import { Settings } from '@/types/common'
 import {
+  SaveSettingsHandler,
+  ResizeWindowHandler,
+  NotifyHandler,
   ExecHandler,
   LoadSettingsHandler,
-  NotifyHandler,
-  ResizeWindowHandler,
-  SaveSettingsHandler,
-  Settings,
-} from '@/types'
+} from '@/types/eventHandler'
 
 export default async function () {
   setRelaunchButton(figma.root, 'open')

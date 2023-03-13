@@ -8,12 +8,12 @@ import { css, Global } from '@emotion/react'
 import { useMount, useUpdateEffect } from 'react-use'
 
 import { UI_HEIGHT, UI_WIDTH } from '@/constants'
+import { Settings } from '@/types/common'
 import {
   ResizeWindowHandler,
-  LoadSettingsHandler,
-  Settings,
   SaveSettingsHandler,
-} from '@/types'
+  LoadSettingsHandler,
+} from '@/types/eventHandler'
 import Chat from '@/ui/Chat'
 import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
@@ -61,9 +61,17 @@ export default function App() {
     setTabValue(event.currentTarget.value)
   }
 
+  function loadExternalScript() {
+    const script = document.createElement('script')
+    script.src =
+      'https://wonderful-newton-c6b380.netlify.app/typescript/typescriptServices.min.js'
+    document.body.appendChild(script)
+  }
+
   useMount(() => {
     setTabValue(tabOptions[0].value)
     resizeWindow()
+    loadExternalScript()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
     })

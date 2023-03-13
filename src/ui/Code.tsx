@@ -1,23 +1,31 @@
 /** @jsx h */
-import { h, JSX } from 'preact'
+import { h } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
-import { Link, Muted, Text } from '@create-figma-plugin/ui'
+import { Button } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import ReactMonacoEditor, { Monaco } from '@monaco-editor/react'
+import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
-import ScrollToBottom from 'react-scroll-to-bottom'
-import { useMount, useUnmount, useUpdateEffect } from 'react-use'
-import * as ts from 'typescript'
+import {
+  useCopyToClipboard,
+  useMount,
+  useUnmount,
+  useUpdateEffect,
+} from 'react-use'
 
-import { DEFAULT_SETTINGS, EDITOR_DEFAULT_OPTIONS } from '@/constants'
-import { ExecHandler, NotifyHandler } from '@/types'
+import { CODE_EDITOR_DEFAULT_OPTIONS, CODE_EDITOR_CDN_URL } from '@/constants'
+import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
-import Message from '@/ui/components/Message'
 import Prompt from '@/ui/components/Prompt'
 import { useSettings } from '@/ui/hooks'
+
+loader.config({
+  paths: {
+    vs: CODE_EDITOR_CDN_URL + '/min/vs',
+  },
+})
 
 export default function Code() {
   const settings = useStore()
@@ -29,6 +37,7 @@ export default function Code() {
   const errorRef = useRef<monaco.editor.IMarker[]>([])
   const observerRef = useRef<MutationObserver>()
   const [editorMounted, setEditorMounted] = useState(false)
+  const [_, copyToClipboard] = useCopyToClipboard()
 
   function beforeMount(monaco: Monaco) {
     console.log('CodeEditor beforeMount', monaco)
@@ -119,6 +128,13 @@ export default function Code() {
     })
   }
 
+  function copy() {
+    copyToClipboard(settings.codeResult)
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Copied to clipboard.',
+    })
+  }
+
   function onHtmlClassNameChange(
     mutations: MutationRecord[],
     observer: MutationObserver
@@ -178,6 +194,7 @@ export default function Code() {
         css={css`
           flex: 1;
           opacity: ${editorMounted ? 1 : 0};
+          position: relative;
         `}
       >
         <ReactMonacoEditor
@@ -187,8 +204,40 @@ export default function Code() {
           onMount={onMount}
           onChange={onChange}
           onValidate={onValidate}
-          options={EDITOR_DEFAULT_OPTIONS}
+          options={CODE_EDITOR_DEFAULT_OPTIONS}
         />
+
+        {/* buttons */}
+        <div
+          css={css`
+            display: flex;
+            gap: var(--space-extra-small);
+            position: absolute;
+            right: calc(var(--space-medium) + var(--space-extra-small));
+            bottom: var(--space-extra-small);
+          `}
+        >
+          {/* copy button */}
+          <Button
+            secondary
+            onClick={copy}
+            disabled={!editorRef.current || settings.codeResult.length === 0}
+          >
+            Copy
+          </Button>
+
+          {/* exec button */}
+          <Button
+            onClick={exec}
+            disabled={
+              !editorRef.current ||
+              settings.codeResult.length === 0 ||
+              error.length > 0
+            }
+          >
+            Exec
+          </Button>
+        </div>
       </div>
 
       {/* prompt */}

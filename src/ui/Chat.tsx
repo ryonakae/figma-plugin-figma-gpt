@@ -7,7 +7,7 @@ import { css } from '@emotion/react'
 import ScrollToBottom from 'react-scroll-to-bottom'
 
 import { DEFAULT_SETTINGS } from '@/constants'
-import { NotifyHandler } from '@/types'
+import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import Message from '@/ui/components/Message'
 import Prompt from '@/ui/components/Prompt'

@@ -1,4 +1,4 @@
-import { ChatModel, CodeModel, Settings } from '@/types'
+import { ChatModel, CodeModel, Settings } from '@/types/common'
 import { useStore } from '@/ui/Store'
 
 export default function useSettings() {

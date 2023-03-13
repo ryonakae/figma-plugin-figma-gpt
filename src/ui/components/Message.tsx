@@ -7,7 +7,8 @@ import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
-import { NotifyHandler, OpenAiChatMessage } from '@/types'
+import { OpenAiChatMessage } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
 
 type MessageProps = ComponentProps<'div'> & OpenAiChatMessage

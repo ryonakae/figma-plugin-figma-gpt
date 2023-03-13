@@ -16,7 +16,8 @@ import { css } from '@emotion/react'
 import { useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
-import { Model, NotifyHandler } from '@/types'
+import { Model } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 

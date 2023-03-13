@@ -18,7 +18,7 @@ import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
-import { ChatModel, CodeModel } from '@/types'
+import { ChatModel, CodeModel } from '@/types/common'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 import useCompletion from '@/ui/hooks/useCompletion'
@@ -114,18 +114,21 @@ export default function Prompt({ type }: PromptProps) {
   useHotkeys(
     ['meta+enter', 'ctrl+enter'],
     (event, handler) => {
+      let length = 0
+
+      if (type === 'chat') {
+        length = settings.chatPrompt.length
+      } else if (type === 'code') {
+        length = settings.codePrompt.length
+      }
+
       if (
         !focusPrompt ||
         !settings.apiKey ||
-        settings.chatPrompt.length === 0 ||
+        length === 0 ||
         loadingRef.current
       ) {
-        console.log(
-          'aborted',
-          focusPrompt,
-          settings.chatPrompt.length,
-          loadingRef.current
-        )
+        console.log('aborted')
         return
       }
 

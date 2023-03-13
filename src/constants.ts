@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor'
 
-import { Settings } from '@/types'
+import { Settings } from '@/types/common'
 
 export const SETTINGS_KEY = 'figma-gpt'
 
@@ -31,7 +31,7 @@ export const DEFAULT_SETTINGS: Settings = {
   codeTotalTokens: 0,
 }
 
-export const EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions =
+export const CODE_EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstructionOptions =
   {
     cursorBlinking: 'smooth',
     folding: false,
@@ -61,3 +61,5 @@ export const EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstruction
     tabSize: 2,
     wordWrap: 'bounded',
   }
+
+export const CODE_EDITOR_CDN_URL = 'https://wonderful-newton-c6b380.netlify.app'
