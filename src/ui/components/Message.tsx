@@ -7,11 +7,11 @@ import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { useCopyToClipboard } from 'react-use'
 
-import { OpenAiChatMessage } from '@/types/common'
+import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
 
-type MessageProps = ComponentProps<'div'> & OpenAiChatMessage
+type MessageProps = ComponentProps<'div'> & ChatMessage
 
 export default function Message({ role, content, ...props }: MessageProps) {
   const [hover, setHover] = useState(false)

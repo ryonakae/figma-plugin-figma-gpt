@@ -105,7 +105,7 @@ export default function App() {
           }
 
           .parameterTitleInput {
-            width: 48px;
+            width: 52px;
 
             & input {
               text-align: right;

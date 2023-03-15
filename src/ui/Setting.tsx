@@ -13,18 +13,16 @@ import {
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import { useMount, useUpdateEffect } from 'react-use'
+import { useMount } from 'react-use'
 
-import { DEFAULT_SETTINGS } from '@/constants'
-import { Model } from '@/types/common'
+import { ALL_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 
 export default function Setting() {
   const settings = useStore()
-  const { updateSettings, updateChatMaxTokens, updateCodeMaxTokens } =
-    useSettings()
+  const { updateSettings, updateMaxTokens } = useSettings()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
     updateSettings({ apiKey: event.currentTarget.value })
@@ -60,20 +58,16 @@ export default function Setting() {
     updateSettings({ presencePenalty: Number(event.currentTarget.value) })
   }
 
-  function getMaximumLength(model: Model) {
-    let length: number
+  function getMaxTokens(modelName: string) {
+    const targetModel = ALL_MODELS.find(model => {
+      return model.model === modelName
+    })
 
-    if (model === 'code-davinci-002') {
-      length = 8000
-    } else if (model === 'gpt-3.5-turbo' || model === 'gpt-3.5-turbo-0301') {
-      length = 4096
-    } else if (model === 'text-davinci-003') {
-      length = 4000
-    } else {
-      length = 2048
+    if (!targetModel) {
+      return 0
     }
 
-    return length
+    return targetModel.maxTokens
   }
 
   function onResetClick() {
@@ -93,14 +87,9 @@ export default function Setting() {
   }
 
   useMount(() => {
-    updateChatMaxTokens(settings.chatModel)
-    updateCodeMaxTokens(settings.codeModel)
+    updateMaxTokens({ type: 'chat', model: settings.chatModel })
+    updateMaxTokens({ type: 'code', model: settings.codeModel })
   })
-
-  useUpdateEffect(() => {
-    updateChatMaxTokens(settings.chatModel)
-    updateCodeMaxTokens(settings.codeModel)
-  }, [settings.chatModel, settings.codeModel])
 
   return (
     <div
@@ -163,7 +152,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaximumLength(settings.chatModel)}
+        maximum={getMaxTokens(settings.chatModel)}
         minimum={0}
         value={String(settings.chatMaxTokens)}
         onChange={onChatMaxTokensChange}
@@ -183,7 +172,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaximumLength(settings.codeModel)}
+        maximum={getMaxTokens(settings.codeModel)}
         minimum={0}
         value={String(settings.codeMaxTokens)}
         onChange={onCodeMaxTokensChange}

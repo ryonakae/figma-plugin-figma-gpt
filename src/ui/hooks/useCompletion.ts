@@ -10,8 +10,8 @@ import {
   OpenAiApiCodeRequest,
   OpenAiApiCodeResponse,
   OpenAiApiError,
-  OpenAiChatMessage,
-} from '@/types/common'
+} from '@/types/api'
+import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
@@ -24,11 +24,11 @@ export default function useCompletion() {
     setLoading(true)
 
     const prompt = settings.chatPrompt
-    const message: OpenAiChatMessage = {
+    const message: ChatMessage = {
       role: 'user',
       content: prompt,
     }
-    const messages: OpenAiChatMessage[] = [...settings.chatMessages, message]
+    const messages: ChatMessage[] = [...settings.chatMessages, message]
 
     updateSettings({
       chatMessages: messages,
