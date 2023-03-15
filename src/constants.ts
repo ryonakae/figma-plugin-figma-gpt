@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor'
 
-import { Settings } from '@/types/common'
+import { Model, Settings } from '@/types/common'
 
 export const SETTINGS_KEY = 'figma-gpt'
 
@@ -62,3 +62,19 @@ export const CODE_EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstru
   }
 
 export const CODE_EDITOR_CDN_URL = 'https://wonderful-newton-c6b380.netlify.app'
+
+export const CHAT_MODELS: Model[] = [
+  { model: 'gpt-4', maxTokens: 8192 },
+  { model: 'gpt-4-0314', maxTokens: 8192 },
+  { model: 'gpt-4-32k', maxTokens: 32768 },
+  { model: 'gpt-4-32k-0314', maxTokens: 32768 },
+  { model: 'gpt-3.5-turbo', maxTokens: 4096 },
+  { model: 'gpt-3.5-turbo-0301', maxTokens: 4096 },
+]
+
+export const CODE_MODELS: Model[] = [
+  { model: 'code-davinci-002', maxTokens: 8000 },
+  { model: 'code-cushman-001', maxTokens: 2048 },
+]
+
+export const ALL_MODELS = [...CHAT_MODELS, ...CODE_MODELS]

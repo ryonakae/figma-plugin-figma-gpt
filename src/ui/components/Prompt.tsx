@@ -18,7 +18,7 @@ import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
-import { ChatModel, CodeModel } from '@/types/common'
+import { CHAT_MODELS, CODE_MODELS } from '@/constants'
 import { useStore } from '@/ui/Store'
 import { useSettings } from '@/ui/hooks'
 import useCompletion from '@/ui/hooks/useCompletion'
@@ -27,15 +27,15 @@ type PromptProps = {
   type: 'chat' | 'code'
 }
 
-const chatModelOptions: Array<DropdownOption<ChatModel>> = [
-  { value: 'gpt-3.5-turbo' },
-  { value: 'gpt-3.5-turbo-0301' },
-]
+const chatModelOptions: Array<DropdownOption> = []
+CHAT_MODELS.map(model => {
+  chatModelOptions.push({ value: model.model })
+})
 
-const codeModelOptions: Array<DropdownOption<CodeModel>> = [
-  { value: 'code-davinci-002' },
-  { value: 'code-cushman-001' },
-]
+const codeModelOptions: Array<DropdownOption> = []
+CODE_MODELS.map(model => {
+  codeModelOptions.push({ value: model.model })
+})
 
 export default function Prompt({ type }: PromptProps) {
   const settings = useStore()
@@ -44,7 +44,7 @@ export default function Prompt({ type }: PromptProps) {
   const loadingRef = useRef(false)
   const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
-  const { updateSettings } = useSettings()
+  const { updateSettings, updateMaxTokens } = useSettings()
   const { chatCompletion, codeCompletion } = useCompletion()
 
   function getPromptPlaceholder() {
@@ -106,10 +106,13 @@ export default function Prompt({ type }: PromptProps) {
   }
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
+    const model = event.currentTarget.value
     if (type === 'chat') {
-      updateSettings({ chatModel: event.currentTarget.value as ChatModel })
+      updateSettings({ chatModel: model })
+      updateMaxTokens({ type: 'chat', model: model })
     } else if (type === 'code') {
-      updateSettings({ codeModel: event.currentTarget.value as CodeModel })
+      updateSettings({ codeModel: model })
+      updateMaxTokens({ type: 'code', model: model })
     }
   }
 

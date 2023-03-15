@@ -1,4 +1,5 @@
-import { ChatModel, CodeModel, Settings } from '@/types/common'
+import { ALL_MODELS } from '@/constants'
+import { Settings } from '@/types/common'
 import { useStore } from '@/ui/Store'
 
 export default function useSettings() {
@@ -6,27 +7,30 @@ export default function useSettings() {
     useStore.setState({ ...useStore.getState(), ...keyValue })
   }
 
-  function updateChatMaxTokens(model: ChatModel) {
-    const chatMaxTokens = useStore.getState().chatMaxTokens
+  function updateMaxTokens(options: { type: 'chat' | 'code'; model: string }) {
+    const targetModel = ALL_MODELS.find(model => {
+      return model.model === options.model
+    })
 
-    if (chatMaxTokens > 4096) {
-      updateSettings({ chatMaxTokens: 4096 })
+    if (!targetModel) {
+      return
+    }
+
+    let currentMaxTokens = 0
+    if (options.type === 'chat') {
+      currentMaxTokens = useStore.getState().chatMaxTokens
+    } else if (options.type === 'code') {
+      currentMaxTokens = useStore.getState().codeMaxTokens
+    }
+
+    if (currentMaxTokens > targetModel.maxTokens) {
+      if (options.type === 'chat') {
+        updateSettings({ chatMaxTokens: targetModel.maxTokens })
+      } else if (options.type === 'code') {
+        updateSettings({ codeMaxTokens: targetModel.maxTokens })
+      }
     }
   }
 
-  function updateCodeMaxTokens(model: CodeModel) {
-    const codeMaxTokens = useStore.getState().codeMaxTokens
-
-    if (model === 'code-davinci-002') {
-      if (codeMaxTokens > 8000) {
-        updateSettings({ codeMaxTokens: 8000 })
-      }
-    } else {
-      if (codeMaxTokens > 2048) {
-        updateSettings({ codeMaxTokens: 2048 })
-      }
-    }
-  }
-
-  return { updateSettings, updateChatMaxTokens, updateCodeMaxTokens }
+  return { updateSettings, updateMaxTokens }
 }
