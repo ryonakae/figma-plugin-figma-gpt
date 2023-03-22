@@ -7,6 +7,7 @@ import { DEFAULT_SETTINGS } from '@/constants'
 import {
   OpenAiApiChatRequest,
   OpenAiApiChatResponse,
+  OpenAiApiChatResponseAsStream,
   OpenAiApiCodeRequest,
   OpenAiApiCodeResponse,
   OpenAiApiError,
@@ -49,38 +50,91 @@ export default function useCompletion() {
         top_p: settings.topP,
         frequency_penalty: settings.frequencyPenalty,
         presence_penalty: settings.presencePenalty,
+        stream: true,
       } as OpenAiApiChatRequest),
     })
       .then(async response => {
-        // エラーコードが返って来た場合、エラーを投げる（catchに書いている処理を実行）
-        if (!response.ok) {
-          console.error('response.ok:', response.ok)
-          console.error('response.status:', response.status)
-
-          // chatMessagesの最後の要素（リクエスト前に追加したメッセージ）を削除
-          updateSettings({
-            chatMessages: dropRight(useStore.getState().chatMessages),
-          })
-
-          const data = (await response.json()) as OpenAiApiError
-          throw new Error(data.error.message) // 以降の処理は中断される
+        if (!response.body) {
+          return
         }
 
-        // 成功時の処理
-        const data = (await response.json()) as OpenAiApiChatResponse
-        console.log(data)
-
+        // promotを空にして、空のassistantメッセージを追加する
         updateSettings({
-          chatPrompt: DEFAULT_SETTINGS.chatPrompt, // promptをクリア
+          chatPrompt: DEFAULT_SETTINGS.chatPrompt,
           chatMessages: [
-            ...useStore.getState().chatMessages, // 最新のstateを取ってこないと人間のメッセージが上書きされてしまう
+            ...useStore.getState().chatMessages,
             {
               role: 'assistant',
-              content: data.choices[0].message.content.trim(),
+              content: '',
             },
           ],
-          chatTotalTokens: data.usage.total_tokens,
         })
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let messageContent = ''
+
+        function readChunk(args: { done: boolean; value?: Uint8Array }) {
+          console.log('readChunk')
+
+          if (args.done) {
+            console.log('end of stream')
+            return
+          }
+
+          const decodedValue = decoder.decode(args.value)
+          console.log('decodedValue:')
+          console.log(decodedValue)
+
+          const strArray = decodedValue
+            .trim()
+            .replace(/\r?\n/g, '')
+            .split('data: ')
+          const dataArray: OpenAiApiChatResponseAsStream[] = []
+          strArray.map((str, index) => {
+            if (str.length === 0) {
+              return
+            } else if (str === '[DONE]') {
+              return
+            }
+
+            const data = JSON.parse(str)
+            dataArray.push(data)
+          })
+
+          console.log(dataArray)
+
+          dataArray.map((data, index) => {
+            const delta = data.choices[0].delta
+
+            if (!delta.content) {
+              return
+            } else if (delta.role) {
+              return
+            } else if (delta.content && delta.content.length === 0) {
+              return
+            }
+
+            messageContent += delta.content
+            console.log('messageContent', messageContent)
+
+            // chatMessagesの最後の要素を削除して、messageContentが本文になってる要素を追加し直す
+            // パッと見文字が増えていくように見える
+            updateSettings({
+              chatMessages: [
+                ...dropRight(useStore.getState().chatMessages),
+                {
+                  role: 'assistant',
+                  content: messageContent.trim(),
+                },
+              ],
+            })
+          })
+
+          reader.read().then(readChunk)
+        }
+
+        reader.read().then(readChunk)
       })
       .catch((err: Error) => {
         console.log('err', err.message)

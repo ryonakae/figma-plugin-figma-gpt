@@ -40,7 +40,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           padding: var(--space-small) var(--space-medium);
           display: flex;
           gap: var(--space-small);
-          align-items: center;
+          align-items: flex-start;
           border-bottom: 1px solid var(--figma-color-bg-secondary);
         `,
         role === 'assistant' &&
@@ -105,6 +105,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           word-break: break-word;
           flex: 1;
           user-select: text;
+          margin-top: 8px;
         `}
       >
         {content}
@@ -116,6 +117,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           display: flex;
           align-items: center;
           justify-content: center;
+          align-self: center;
         `}
       >
         <div

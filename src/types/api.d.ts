@@ -9,6 +9,7 @@ export type OpenAiApiChatRequest = {
   max_tokens?: number
   presence_penalty?: number
   frequency_penalty?: number
+  stream?: boolean
 }
 
 export type OpenAiApiChatResponse = {
@@ -25,6 +26,21 @@ export type OpenAiApiChatResponse = {
     completion_tokens: number
     total_tokens: number
   }
+}
+
+export type OpenAiApiChatResponseAsStream = {
+  id: string
+  created: number
+  object: string
+  model: string
+  choices: {
+    index: number
+    delta: {
+      role?: string
+      content?: string
+    }
+    finish_reason: string
+  }[]
 }
 
 export type OpenAiApiCodeRequest = {
