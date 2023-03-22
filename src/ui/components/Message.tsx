@@ -1,11 +1,18 @@
 /** @jsx h */
 import { h, JSX, ComponentProps } from 'preact'
-import { useState } from 'preact/hooks'
 
 import { Link, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
+import { createElement, Fragment, ReactNode, useEffect, useState } from 'react'
 import { useCopyToClipboard } from 'react-use'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeParse from 'rehype-parse'
+import rehypeReact from 'rehype-react'
+import rehypeStringify from 'rehype-stringify'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import { unified } from 'unified'
 
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
@@ -16,6 +23,7 @@ type MessageProps = ComponentProps<'div'> & ChatMessage
 export default function Message({ role, content, ...props }: MessageProps) {
   const [hover, setHover] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
+  const [Node, setNode] = useState<ReactNode>(<div />)
 
   function onMouseEnter() {
     setHover(true)
@@ -32,6 +40,20 @@ export default function Message({ role, content, ...props }: MessageProps) {
       message: 'Copied to clipboard.',
     })
   }
+
+  useEffect(() => {
+    const parser = unified()
+      // parse string to html
+      .use(remarkParse) // markdown -> mdast
+      .use(remarkRehype) // mdast -> hast
+      .use(rehypeStringify) // hast -> html
+      .use(rehypeHighlight) // highlight.js
+      // parse html to react node
+      .use(rehypeParse, { fragment: true })
+      .use(rehypeReact, { Fragment, createElement } as any)
+
+    parser.process(content).then(file => setNode(file.result))
+  }, [content])
 
   return (
     <div
@@ -99,7 +121,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
       </div>
 
       {/* content */}
-      <span
+      <div
         css={css`
           white-space: pre-wrap;
           word-break: break-word;
@@ -108,8 +130,8 @@ export default function Message({ role, content, ...props }: MessageProps) {
           margin-top: 8px;
         `}
       >
-        {content}
-      </span>
+        {Node}
+      </div>
 
       {/* copy button */}
       <div

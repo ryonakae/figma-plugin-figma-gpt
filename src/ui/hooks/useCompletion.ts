@@ -83,8 +83,6 @@ export default function useCompletion() {
           }
 
           const decodedValue = decoder.decode(args.value)
-          console.log('decodedValue:')
-          console.log(decodedValue)
 
           const strArray = decodedValue
             .trim()
@@ -116,7 +114,6 @@ export default function useCompletion() {
             }
 
             messageContent += delta.content
-            console.log('messageContent', messageContent)
 
             // chatMessagesの最後の要素を削除して、messageContentが本文になってる要素を追加し直す
             // パッと見文字が増えていくように見える
