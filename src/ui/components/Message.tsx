@@ -5,8 +5,10 @@ import { useState } from 'preact/hooks'
 import { Link, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
+import hljs from 'highlight.js'
+import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { useCopyToClipboard } from 'react-use'
+import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
 import rehypeHighlight from 'rehype-highlight'
 
 import { ChatMessage } from '@/types/common'
@@ -108,24 +110,19 @@ export default function Message({ role, content, ...props }: MessageProps) {
           white-space: pre-wrap;
           word-break: break-word;
           flex: 1;
-          margin-top: 8px;
           overflow-x: auto;
+          display: flex;
+          flex-direction: column;
+          row-gap: 1.5em;
 
           & * {
             user-select: text;
             cursor: auto;
           }
 
-          & > *:first-child {
-            margin-top: 0;
-          }
-          & > *:last-child {
-            margin-bottom: 0;
-          }
-
           & > * {
-            margin-top: 1.5em;
-            margin-bottom: 1.5em;
+            margin-top: 0;
+            margin-bottom: 0;
           }
 
           p {
@@ -140,17 +137,20 @@ export default function Message({ role, content, ...props }: MessageProps) {
           }
 
           pre {
-            margin: -1.5em 0;
             border-radius: var(--border-radius-6);
             overflow-x: auto;
             width: 100%;
+            background-color: var(--figma-color-bg-tertiary);
 
             code {
+              display: block;
+              overflow-x: auto;
+              padding: 1em;
               hyphens: none;
               word-wrap: normal;
               word-break: normal;
               word-spacing: normal;
-              background-color: var(--figma-color-bg-tertiary);
+              background-color: transparent;
             }
           }
         `}
