@@ -1,21 +1,22 @@
 /** @jsx h */
-import { h, JSX, ComponentProps } from 'preact'
+import { JSX, ComponentProps } from 'preact'
 import { useState } from 'preact/hooks'
 
 import { Link, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import hljs from 'highlight.js'
-import { useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
-import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
-import rehypeHighlight from 'rehype-highlight'
+import { useCopyToClipboard } from 'react-use'
+import rehypeHighlight, {
+  Options as rehypeHighlightOptions,
+} from 'rehype-highlight'
 
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
+import CodeBlock from '@/ui/components/CodeBlock'
 
-import '!highlight.js/styles/default.css'
+import '!highlight.js/styles/github.css'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
@@ -38,6 +39,11 @@ export default function Message({ role, content, ...props }: MessageProps) {
       message: 'Copied to clipboard.',
     })
   }
+
+  // useMount(() => {
+  //   ;(hljs as any).initHighlighting.called = false
+  //   hljs.initHighlighting()
+  // })
 
   return (
     <div
@@ -107,6 +113,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
       {/* content */}
       <div
         css={css`
+          margin-top: 8px;
           white-space: pre-wrap;
           word-break: break-word;
           flex: 1;
@@ -135,27 +142,26 @@ export default function Message({ role, content, ...props }: MessageProps) {
               }
             }
           }
-
-          pre {
-            border-radius: var(--border-radius-6);
-            overflow-x: auto;
-            width: 100%;
-            background-color: var(--figma-color-bg-tertiary);
-
-            code {
-              display: block;
-              overflow-x: auto;
-              padding: 1em;
-              hyphens: none;
-              word-wrap: normal;
-              word-break: normal;
-              word-spacing: normal;
-              background-color: transparent;
-            }
-          }
         `}
       >
-        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+        <ReactMarkdown
+          // rehypePlugins={[
+          //   [
+          //     rehypeHighlight,
+          //     {
+          //       detect: true,
+          //       ignoreMissing: true,
+          //     } as rehypeHighlightOptions,
+          //   ],
+          // ]}
+          components={{
+            pre: ({ node, className, children, ...props }) => (
+              <CodeBlock node={node} className={className}>
+                {children}
+              </CodeBlock>
+            ),
+          }}
+        >
           {content}
         </ReactMarkdown>
       </div>
