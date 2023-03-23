@@ -1,29 +1,25 @@
 /** @jsx h */
 import { h, JSX, ComponentProps } from 'preact'
+import { useState } from 'preact/hooks'
 
 import { Link, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import { createElement, Fragment, ReactNode, useEffect, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import { useCopyToClipboard } from 'react-use'
 import rehypeHighlight from 'rehype-highlight'
-import rehypeParse from 'rehype-parse'
-import rehypeReact from 'rehype-react'
-import rehypeStringify from 'rehype-stringify'
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import { unified } from 'unified'
 
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
+
+import '!highlight.js/styles/default.css'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
 export default function Message({ role, content, ...props }: MessageProps) {
   const [hover, setHover] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
-  const [Node, setNode] = useState<ReactNode>(<div />)
 
   function onMouseEnter() {
     setHover(true)
@@ -40,20 +36,6 @@ export default function Message({ role, content, ...props }: MessageProps) {
       message: 'Copied to clipboard.',
     })
   }
-
-  useEffect(() => {
-    const parser = unified()
-      // parse string to html
-      .use(remarkParse) // markdown -> mdast
-      .use(remarkRehype) // mdast -> hast
-      .use(rehypeStringify) // hast -> html
-      .use(rehypeHighlight) // highlight.js
-      // parse html to react node
-      .use(rehypeParse, { fragment: true })
-      .use(rehypeReact, { Fragment, createElement } as any)
-
-    parser.process(content).then(file => setNode(file.result))
-  }, [content])
 
   return (
     <div
@@ -126,11 +108,56 @@ export default function Message({ role, content, ...props }: MessageProps) {
           white-space: pre-wrap;
           word-break: break-word;
           flex: 1;
-          user-select: text;
           margin-top: 8px;
+          overflow-x: auto;
+
+          & * {
+            user-select: text;
+            cursor: auto;
+          }
+
+          & > *:first-child {
+            margin-top: 0;
+          }
+          & > *:last-child {
+            margin-bottom: 0;
+          }
+
+          & > * {
+            margin-top: 1.5em;
+            margin-bottom: 1.5em;
+          }
+
+          p {
+            code {
+              color: var(--figma-color-text-secondary);
+
+              &::before,
+              &::after {
+                content: '\`';
+              }
+            }
+          }
+
+          pre {
+            margin: -1.5em 0;
+            border-radius: var(--border-radius-6);
+            overflow-x: auto;
+            width: 100%;
+
+            code {
+              hyphens: none;
+              word-wrap: normal;
+              word-break: normal;
+              word-spacing: normal;
+              background-color: var(--figma-color-bg-tertiary);
+            }
+          }
         `}
       >
-        {Node}
+        <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
+          {content}
+        </ReactMarkdown>
       </div>
 
       {/* copy button */}

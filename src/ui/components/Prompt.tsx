@@ -187,6 +187,10 @@ export default function Prompt({ type }: PromptProps) {
                   min-height: 48px;
                 }
               }
+
+              & textarea {
+                cursor: text;
+              }
             `}
             onFocus={onPromptFocus}
             onBlur={onPromptBlur}
