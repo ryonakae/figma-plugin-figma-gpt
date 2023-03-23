@@ -14,9 +14,7 @@ import rehypeHighlight, {
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import Icon from '@/ui/assets/img/icon.png'
-import CodeBlock from '@/ui/components/CodeBlock'
-
-import '!highlight.js/styles/github.css'
+import CodeBlockProps from '@/ui/components/CodeBlock'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
@@ -39,11 +37,6 @@ export default function Message({ role, content, ...props }: MessageProps) {
       message: 'Copied to clipboard.',
     })
   }
-
-  // useMount(() => {
-  //   ;(hljs as any).initHighlighting.called = false
-  //   hljs.initHighlighting()
-  // })
 
   return (
     <div
@@ -120,7 +113,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           overflow-x: auto;
           display: flex;
           flex-direction: column;
-          row-gap: 1.5em;
+          row-gap: 1em;
 
           & * {
             user-select: text;
@@ -145,21 +138,23 @@ export default function Message({ role, content, ...props }: MessageProps) {
         `}
       >
         <ReactMarkdown
-          // rehypePlugins={[
-          //   [
-          //     rehypeHighlight,
-          //     {
-          //       detect: true,
-          //       ignoreMissing: true,
-          //     } as rehypeHighlightOptions,
-          //   ],
-          // ]}
+          rehypePlugins={[
+            [
+              rehypeHighlight,
+              {
+                detect: true,
+                ignoreMissing: true,
+              } as rehypeHighlightOptions,
+            ],
+          ]}
           components={{
-            pre: ({ node, className, children, ...props }) => (
-              <CodeBlock node={node} className={className}>
-                {children}
-              </CodeBlock>
-            ),
+            pre({ node, className, children, ...props }) {
+              return (
+                <CodeBlockProps node={node} className={className}>
+                  {children}
+                </CodeBlockProps>
+              )
+            },
           }}
         >
           {content}

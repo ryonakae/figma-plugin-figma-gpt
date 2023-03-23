@@ -1,12 +1,14 @@
-import { ComponentProps } from 'preact'
+/** @jsx h */
+import { h } from 'preact'
 
 import { css } from '@emotion/react'
-import { ReactElement, ReactNode } from 'react'
-import SyntaxHighlighter from 'react-syntax-highlighter'
-import { useMount } from 'react-use'
+import { ReactNode } from 'react'
+import { Element } from 'react-markdown/lib/rehype-filter'
 
-type CodeBlockProps = ComponentProps<'div'> & {
-  node: any
+import '!highlight.js/styles/github.css'
+
+type CodeBlockProps = {
+  node: Element
   className?: string
   children: ReactNode | ReactNode[]
 }
@@ -15,14 +17,7 @@ export default function CodeBlock({
   node,
   className,
   children,
-  ...props
 }: CodeBlockProps) {
-  const match = /language-(\w+)/.exec(className || '')
-
-  useMount(() => {
-    console.log('CodeBlock mounted', node, className, children, props)
-  })
-
   return (
     <div
       css={css`
@@ -39,14 +34,16 @@ export default function CodeBlock({
           justify-content: space-between;
         `}
       >
-        <span>xxx</span>
+        <span>Code</span>
         <span>Copy code</span>
       </div>
       <div
         css={css`
           background-color: var(--figma-color-bg-tertiary);
-
-          pre {
+        `}
+      >
+        <pre
+          css={css`
             margin: 0;
             padding: 1em;
             overflow-x: auto;
@@ -61,16 +58,10 @@ export default function CodeBlock({
               word-spacing: normal;
               background-color: transparent;
             }
-          }
-        `}
-      >
-        {match ? (
-          <SyntaxHighlighter language={match[1]}>
-            {String(children).replace(/\n$/, '')}
-          </SyntaxHighlighter>
-        ) : (
-          <pre className={className}>{children}</pre>
-        )}
+          `}
+        >
+          {children}
+        </pre>
       </div>
     </div>
   )

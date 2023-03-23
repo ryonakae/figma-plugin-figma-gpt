@@ -41,6 +41,7 @@ export type OpenAiApiChatResponseAsStream = {
     }
     finish_reason: string
   }[]
+  error?: OpenAiApiError['error']
 }
 
 export type OpenAiApiCodeRequest = {

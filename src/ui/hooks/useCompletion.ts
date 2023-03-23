@@ -6,7 +6,6 @@ import { dropRight } from 'lodash'
 import { DEFAULT_SETTINGS } from '@/constants'
 import {
   OpenAiApiChatRequest,
-  OpenAiApiChatResponse,
   OpenAiApiChatResponseAsStream,
   OpenAiApiCodeRequest,
   OpenAiApiCodeResponse,
@@ -20,6 +19,16 @@ import { useSettings } from '@/ui/hooks'
 export default function useCompletion() {
   const settings = useStore()
   const { updateSettings } = useSettings()
+
+  function onError(err: Error) {
+    console.error('err:', err.message)
+    emit<NotifyHandler>('NOTIFY', {
+      message: err.message,
+      options: {
+        error: true,
+      },
+    })
+  }
 
   async function chatCompletion(setLoading: StateUpdater<boolean>) {
     setLoading(true)
@@ -74,11 +83,12 @@ export default function useCompletion() {
         const decoder = new TextDecoder()
         let messageContent = ''
 
-        function readChunk(args: { done: boolean; value?: Uint8Array }) {
+        async function readChunk(args: { done: boolean; value?: Uint8Array }) {
           console.log('readChunk')
 
           if (args.done) {
             console.log('end of stream')
+            await reader.cancel()
             return
           }
 
@@ -100,7 +110,21 @@ export default function useCompletion() {
             dataArray.push(data)
           })
 
-          console.log(dataArray)
+          console.log('dataArray:', dataArray)
+
+          // エラーハンドリング
+          if (dataArray[0].error) {
+            await reader.cancel()
+
+            // promptを元に戻す
+            // chatMessagesに追加した空の要素を削除
+            updateSettings({
+              chatPrompt: prompt,
+              chatMessages: dropRight(useStore.getState().chatMessages),
+            })
+
+            throw new Error(dataArray[0].error.message)
+          }
 
           dataArray.map((data, index) => {
             const delta = data.choices[0].delta
@@ -128,20 +152,12 @@ export default function useCompletion() {
             })
           })
 
-          reader.read().then(readChunk)
+          reader.read().then(readChunk).catch(onError)
         }
 
-        reader.read().then(readChunk)
+        reader.read().then(readChunk).catch(onError)
       })
-      .catch((err: Error) => {
-        console.log('err', err.message)
-        emit<NotifyHandler>('NOTIFY', {
-          message: err.message,
-          options: {
-            error: true,
-          },
-        })
-      })
+      .catch(onError)
       .finally(() => {
         setLoading(false)
       })
