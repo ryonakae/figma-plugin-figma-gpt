@@ -1,10 +1,12 @@
 /** @jsx h */
 import { h, JSX } from 'preact'
+import { useRef } from 'preact/hooks'
 
 import { Link, Muted, Text } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ScrollToBottom from 'react-scroll-to-bottom'
+import { useMount, useUnmount } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
 import { NotifyHandler } from '@/types/eventHandler'
@@ -16,6 +18,7 @@ import { useSettings } from '@/ui/hooks'
 export default function Chat() {
   const settings = useStore()
   const { updateSettings } = useSettings()
+  const observerRef = useRef<MutationObserver>()
 
   function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
     event.preventDefault()
@@ -29,6 +32,57 @@ export default function Chat() {
       message: 'Conversation cleared.',
     })
   }
+
+  function onHtmlClassNameChange(
+    mutations: MutationRecord[],
+    observer: MutationObserver
+  ) {
+    const html = mutations[0].target as HTMLElement
+    updateTheme(html)
+  }
+
+  function updateTheme(html: HTMLElement) {
+    console.log('updateTheme', html)
+
+    const oldTheme = document.getElementById('highlightjs-theme')
+    if (oldTheme && oldTheme.parentNode) {
+      oldTheme.parentNode.removeChild(oldTheme)
+    }
+
+    const link = document.createElement('link')
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('id', 'highlightjs-theme')
+
+    if (html.classList.contains('figma-dark')) {
+      link.setAttribute(
+        'href',
+        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css'
+      )
+    } else {
+      link.setAttribute(
+        'href',
+        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css'
+      )
+    }
+    document.head.appendChild(link)
+  }
+
+  useMount(() => {
+    observerRef.current = new MutationObserver(onHtmlClassNameChange)
+    observerRef.current.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    updateTheme(document.documentElement)
+  })
+
+  useUnmount(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+      observerRef.current = undefined
+    }
+  })
 
   return (
     <div

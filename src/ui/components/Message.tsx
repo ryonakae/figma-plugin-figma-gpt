@@ -135,6 +135,14 @@ export default function Message({ role, content, ...props }: MessageProps) {
               }
             }
           }
+
+          ul,
+          ol {
+            padding-left: 1.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+          }
         `}
       >
         <ReactMarkdown

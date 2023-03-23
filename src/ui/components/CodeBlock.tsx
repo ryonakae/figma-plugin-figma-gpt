@@ -5,7 +5,7 @@ import { css } from '@emotion/react'
 import { ReactNode } from 'react'
 import { Element } from 'react-markdown/lib/rehype-filter'
 
-import '!highlight.js/styles/github.css'
+// import '!highlight.js/styles/github.css'
 
 type CodeBlockProps = {
   node: Element
@@ -29,7 +29,7 @@ export default function CodeBlock({
       <div
         css={css`
           padding: 0.5em 1em;
-          background-color: var(--figma-color-bg-disabled-secondary);
+          background-color: var(--figma-color-bg-disabled);
           display: flex;
           justify-content: space-between;
         `}
