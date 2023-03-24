@@ -1,3 +1,5 @@
+export type Theme = 'light' | 'dark'
+
 export type Model = {
   model: string
   maxTokens: number
@@ -5,6 +7,7 @@ export type Model = {
 
 export type Settings = {
   // common
+  theme: Theme
   lastOpenTab: string
   apiKey: string
   temperature: number

@@ -14,7 +14,7 @@ import {
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
 
 export default function useCompletion() {
   const settings = useStore()

@@ -18,7 +18,7 @@ import { useMount } from 'react-use'
 import { ALL_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
 
 export default function Setting() {
   const settings = useStore()

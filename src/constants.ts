@@ -9,6 +9,7 @@ export const UI_HEIGHT = 0
 
 export const DEFAULT_SETTINGS: Settings = {
   // common
+  theme: 'light',
   lastOpenTab: 'Chat',
   apiKey: '',
   temperature: 0.7,

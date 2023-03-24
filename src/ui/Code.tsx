@@ -19,11 +19,13 @@ import {
   CODE_EDITOR_CDN_URL,
   DEFAULT_SETTINGS,
 } from '@/constants'
+import { Theme } from '@/types/common'
 import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
 import Prompt from '@/ui/components/Prompt'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
+import useTheme from '@/ui/hooks/useTheme'
 
 loader.config({
   paths: {
@@ -39,7 +41,6 @@ export default function Code() {
   const modelRef = useRef<monaco.editor.ITextModel>()
   const [error, setError] = useState<monaco.editor.IMarker[]>([])
   const errorRef = useRef<monaco.editor.IMarker[]>([])
-  const observerRef = useRef<MutationObserver>()
   const [editorMounted, setEditorMounted] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
 
@@ -89,7 +90,7 @@ export default function Code() {
     editorRef.current = editor
 
     // テーマの更新
-    updateTheme(document.documentElement)
+    updateTheme(settings.theme)
 
     // キーボードショートカットの設定
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, handler => {
@@ -145,22 +146,12 @@ export default function Code() {
     })
   }
 
-  function onHtmlClassNameChange(
-    mutations: MutationRecord[],
-    observer: MutationObserver
-  ) {
-    const html = mutations[0].target as HTMLElement
-    updateTheme(html)
-  }
-
-  function updateTheme(html: HTMLElement) {
-    console.log('updateTheme', html)
-
+  function updateTheme(theme: Theme) {
     if (!monacoRef.current) {
       return
     }
 
-    if (html.classList.contains('figma-dark')) {
+    if (theme === 'dark') {
       monacoRef.current.editor.setTheme('vs-dark')
     } else {
       monacoRef.current.editor.setTheme('light')
@@ -180,29 +171,20 @@ export default function Code() {
     })
   }
 
-  useMount(() => {
-    observerRef.current = new MutationObserver(onHtmlClassNameChange)
-    observerRef.current.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-  })
-
   useUnmount(() => {
     // destroy textModel on unmount
     if (modelRef.current) {
       modelRef.current.dispose()
-    }
-
-    if (observerRef.current) {
-      observerRef.current.disconnect()
-      observerRef.current = undefined
     }
   })
 
   useUpdateEffect(() => {
     errorRef.current = error
   }, [error])
+
+  useUpdateEffect(() => {
+    updateTheme(settings.theme)
+  }, [settings.theme])
 
   return (
     <div

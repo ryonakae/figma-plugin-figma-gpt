@@ -20,8 +20,8 @@ import { useUpdateEffect } from 'react-use'
 
 import { CHAT_MODELS, CODE_MODELS } from '@/constants'
 import { useStore } from '@/ui/Store'
-import { useSettings } from '@/ui/hooks'
 import useCompletion from '@/ui/hooks/useCompletion'
+import useSettings from '@/ui/hooks/useSettings'
 
 type PromptProps = {
   type: 'chat' | 'code'

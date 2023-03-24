@@ -1,24 +1,23 @@
 /** @jsx h */
 import { h, JSX } from 'preact'
-import { useRef } from 'preact/hooks'
 
 import { Link, Muted, Text } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ScrollToBottom from 'react-scroll-to-bottom'
-import { useMount, useUnmount } from 'react-use'
+import { useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
+import { Theme } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import Message from '@/ui/components/Message'
 import Prompt from '@/ui/components/Prompt'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
 
 export default function Chat() {
   const settings = useStore()
   const { updateSettings } = useSettings()
-  const observerRef = useRef<MutationObserver>()
 
   function onClearClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
     event.preventDefault()
@@ -33,56 +32,40 @@ export default function Chat() {
     })
   }
 
-  function onHtmlClassNameChange(
-    mutations: MutationRecord[],
-    observer: MutationObserver
-  ) {
-    const html = mutations[0].target as HTMLElement
-    updateTheme(html)
-  }
+  function updateTheme(theme: Theme) {
+    console.log('updateTheme on chat', theme)
 
-  function updateTheme(html: HTMLElement) {
-    console.log('updateTheme', html)
-
-    const oldTheme = document.getElementById('highlightjs-theme')
-    if (oldTheme && oldTheme.parentNode) {
-      oldTheme.parentNode.removeChild(oldTheme)
+    const oldLinkTag = document.getElementById('highlightjs-theme')
+    if (oldLinkTag && oldLinkTag.parentNode) {
+      oldLinkTag.parentNode.removeChild(oldLinkTag)
     }
 
-    const link = document.createElement('link')
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('id', 'highlightjs-theme')
+    const linkTag = document.createElement('link')
+    linkTag.setAttribute('rel', 'stylesheet')
+    linkTag.setAttribute('id', 'highlightjs-theme')
 
-    if (html.classList.contains('figma-dark')) {
-      link.setAttribute(
+    if (theme === 'dark') {
+      linkTag.setAttribute(
         'href',
         'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css'
       )
     } else {
-      link.setAttribute(
+      linkTag.setAttribute(
         'href',
         'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css'
       )
     }
-    document.head.appendChild(link)
+
+    document.head.appendChild(linkTag)
   }
 
   useMount(() => {
-    observerRef.current = new MutationObserver(onHtmlClassNameChange)
-    observerRef.current.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-
-    updateTheme(document.documentElement)
+    updateTheme(settings.theme)
   })
 
-  useUnmount(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect()
-      observerRef.current = undefined
-    }
-  })
+  useUpdateEffect(() => {
+    updateTheme(settings.theme)
+  }, [settings.theme])
 
   return (
     <div
