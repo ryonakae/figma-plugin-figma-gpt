@@ -24,7 +24,7 @@ export type Settings = {
   chatTotalTokens: number
 
   // code
-  codeModel: string
+  codeModel0324: string
   codeMaxTokens: number
   codePrompt: string
   codeResult: string

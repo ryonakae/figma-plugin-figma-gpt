@@ -88,7 +88,7 @@ export default function Setting() {
 
   useMount(() => {
     updateMaxTokens({ type: 'chat', model: settings.chatModel })
-    updateMaxTokens({ type: 'code', model: settings.codeModel })
+    updateMaxTokens({ type: 'code', model: settings.codeModel0324 })
   })
 
   return (
@@ -172,7 +172,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.codeModel)}
+        maximum={getMaxTokens(settings.codeModel0324)}
         minimum={0}
         value={String(settings.codeMaxTokens)}
         onChange={onCodeMaxTokensChange}

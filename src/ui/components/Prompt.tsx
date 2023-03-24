@@ -18,7 +18,7 @@ import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
-import { CHAT_MODELS, CODE_MODELS } from '@/constants'
+import { CHAT_MODELS, CODE_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { useStore } from '@/ui/Store'
 import useCompletion from '@/ui/hooks/useCompletion'
 import useSettings from '@/ui/hooks/useSettings'
@@ -111,7 +111,7 @@ export default function Prompt({ type }: PromptProps) {
       updateSettings({ chatModel: model })
       updateMaxTokens({ type: 'chat', model: model })
     } else if (type === 'code') {
-      updateSettings({ codeModel: model })
+      updateSettings({ codeModel0324: model })
       updateMaxTokens({ type: 'code', model: model })
     }
   }
@@ -246,7 +246,7 @@ export default function Prompt({ type }: PromptProps) {
               <Dropdown
                 onChange={onModelChange}
                 options={chatModelOptions}
-                value={settings.chatModel || null}
+                value={settings.chatModel || DEFAULT_SETTINGS.chatModel}
                 variant="border"
                 style={{
                   justifyContent: 'space-between',
@@ -257,7 +257,7 @@ export default function Prompt({ type }: PromptProps) {
               <Dropdown
                 onChange={onModelChange}
                 options={codeModelOptions}
-                value={settings.codeModel || null}
+                value={settings.codeModel0324 || DEFAULT_SETTINGS.codeModel0324}
                 variant="border"
                 style={{
                   justifyContent: 'space-between',

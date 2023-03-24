@@ -175,7 +175,7 @@ export default function useCompletion() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.codeModel,
+        model: settings.codeModel0324,
         prompt: prompt,
         temperature: settings.temperature,
         max_tokens: settings.codeMaxTokens,

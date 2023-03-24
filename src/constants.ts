@@ -26,7 +26,7 @@ export const DEFAULT_SETTINGS: Settings = {
   chatTotalTokens: 0,
 
   // code
-  codeModel: 'code-davinci-002',
+  codeModel0324: 'text-davinci-003',
   codeMaxTokens: 1024,
   codePrompt: '',
   codeResult: '',
@@ -74,8 +74,15 @@ export const CHAT_MODELS: Model[] = [
 ]
 
 export const CODE_MODELS: Model[] = [
-  { model: 'code-davinci-002', maxTokens: 8000 },
-  { model: 'code-cushman-001', maxTokens: 2048 },
+  { model: 'text-davinci-003', maxTokens: 4096 },
+  { model: 'text-davinci-002', maxTokens: 4096 },
+  { model: 'text-curie-001', maxTokens: 2048 },
+  { model: 'text-babbage-001', maxTokens: 2048 },
+  { model: 'text-ada-001', maxTokens: 2048 },
+  { model: 'davinci', maxTokens: 2048 },
+  { model: 'curie', maxTokens: 2048 },
+  { model: 'babbage', maxTokens: 2048 },
+  { model: 'ada', maxTokens: 2048 },
 ]
 
 export const ALL_MODELS = [...CHAT_MODELS, ...CODE_MODELS]
