@@ -2,28 +2,29 @@
 import { h, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
-import { Button, Link, Text } from '@create-figma-plugin/ui'
-import { emit } from '@create-figma-plugin/utilities'
+import { DropdownOption, Link, Text } from '@create-figma-plugin/ui'
 import { css } from '@emotion/react'
 import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
-import {
-  useCopyToClipboard,
-  useMount,
-  useUnmount,
-  useUpdateEffect,
-} from 'react-use'
+import { useUnmount, useUpdateEffect } from 'react-use'
 
 import {
   CODE_EDITOR_DEFAULT_OPTIONS,
   CODE_EDITOR_CDN_URL,
   DEFAULT_SETTINGS,
+  CODE_MODELS,
 } from '@/constants'
-import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
+import { Theme } from '@/types/common'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
-import Prompt from '@/ui/components/Prompt'
-import { useSettings } from '@/ui/hooks'
+import CodePrompt from '@/ui/components/CodePrompt'
+import useCompletion from '@/ui/hooks/useCompletion'
+import useSettings from '@/ui/hooks/useSettings'
+
+const codeModelOptions: Array<DropdownOption> = []
+CODE_MODELS.map(model => {
+  codeModelOptions.push({ value: model.model })
+})
 
 loader.config({
   paths: {
@@ -39,9 +40,8 @@ export default function Code() {
   const modelRef = useRef<monaco.editor.ITextModel>()
   const [error, setError] = useState<monaco.editor.IMarker[]>([])
   const errorRef = useRef<monaco.editor.IMarker[]>([])
-  const observerRef = useRef<MutationObserver>()
   const [editorMounted, setEditorMounted] = useState(false)
-  const [_, copyToClipboard] = useCopyToClipboard()
+  const { codeCompletion } = useCompletion()
 
   function beforeMount(monaco: Monaco) {
     console.log('CodeEditor beforeMount', monaco)
@@ -89,12 +89,16 @@ export default function Code() {
     editorRef.current = editor
 
     // テーマの更新
-    updateTheme(document.documentElement)
+    updateTheme(settings.theme)
 
     // キーボードショートカットの設定
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, handler => {
       console.log('CodeEditor cmd + enter pressed at inner of editor', handler)
-      exec()
+      if (!editorRef.current || useStore.getState().codePrompt.length === 0) {
+        console.log('submit aborted')
+        return
+      }
+      submit()
     })
 
     setEditorMounted(true)
@@ -106,7 +110,7 @@ export default function Code() {
   ) {
     console.log('CodeEditor onChange', value, event)
     updateSettings({
-      codeResult: value || '',
+      codePrompt: value,
     })
   }
 
@@ -115,52 +119,12 @@ export default function Code() {
     setError(markers)
   }
 
-  function exec() {
-    if (
-      !editorRef.current ||
-      settings.codeResult.length === 0 ||
-      errorRef.current.length > 0
-    ) {
-      console.log('exec aborted')
-      return
-    }
-
-    console.log('exec')
-
-    const tsCode = editorRef.current.getValue()
-    console.log(tsCode)
-    const jsCode = ts.transpile(tsCode)
-    console.log(jsCode)
-
-    emit<ExecHandler>('EXEC', jsCode)
-    emit<NotifyHandler>('NOTIFY', {
-      message: 'Code has been executed.',
-    })
-  }
-
-  function copy() {
-    copyToClipboard(settings.codeResult)
-    emit<NotifyHandler>('NOTIFY', {
-      message: 'Copied to clipboard.',
-    })
-  }
-
-  function onHtmlClassNameChange(
-    mutations: MutationRecord[],
-    observer: MutationObserver
-  ) {
-    const html = mutations[0].target as HTMLElement
-    updateTheme(html)
-  }
-
-  function updateTheme(html: HTMLElement) {
-    console.log('updateTheme', html)
-
+  function updateTheme(theme: Theme) {
     if (!monacoRef.current) {
       return
     }
 
-    if (html.classList.contains('figma-dark')) {
+    if (theme === 'dark') {
       monacoRef.current.editor.setTheme('vs-dark')
     } else {
       monacoRef.current.editor.setTheme('light')
@@ -171,38 +135,29 @@ export default function Code() {
     event.preventDefault()
 
     updateSettings({
-      codeResult: DEFAULT_SETTINGS.codeResult,
+      codePrompt: DEFAULT_SETTINGS.codePrompt,
       codeTotalTokens: DEFAULT_SETTINGS.codeTotalTokens,
-    })
-
-    emit<NotifyHandler>('NOTIFY', {
-      message: 'Code cleared.',
     })
   }
 
-  useMount(() => {
-    observerRef.current = new MutationObserver(onHtmlClassNameChange)
-    observerRef.current.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-  })
+  function submit() {
+    codeCompletion()
+  }
 
   useUnmount(() => {
     // destroy textModel on unmount
     if (modelRef.current) {
       modelRef.current.dispose()
     }
-
-    if (observerRef.current) {
-      observerRef.current.disconnect()
-      observerRef.current = undefined
-    }
   })
 
   useUpdateEffect(() => {
     errorRef.current = error
   }, [error])
+
+  useUpdateEffect(() => {
+    updateTheme(settings.theme)
+  }, [settings.theme])
 
   return (
     <div
@@ -221,7 +176,7 @@ export default function Code() {
         `}
       >
         <ReactMonacoEditor
-          value={settings.codeResult}
+          value={settings.codePrompt}
           defaultLanguage="typescript"
           beforeMount={beforeMount}
           onMount={onMount}
@@ -234,7 +189,6 @@ export default function Code() {
         <div
           css={css`
             display: flex;
-            gap: var(--space-extra-small);
             align-items: center;
             position: absolute;
             left: 0;
@@ -242,25 +196,9 @@ export default function Code() {
             width: 100%;
             padding-left: var(--space-medium);
             padding-right: calc(var(--space-medium) + var(--space-extra-small));
-            padding-bottom: var(--space-extra-small);
+            padding-bottom: var(--space-medium);
           `}
         >
-          {/* clear button */}
-          {settings.codeResult.length > 0 && (
-            <Text>
-              <Link href="#" onClick={onClearClick}>
-                Clear code
-              </Link>
-            </Text>
-          )}
-
-          {/* spacer */}
-          <div
-            css={css`
-              flex: 1;
-            `}
-          />
-
           {/* error count */}
           {error.length > 0 && (
             <Text>
@@ -275,31 +213,26 @@ export default function Code() {
             </Text>
           )}
 
-          {/* copy button */}
-          <Button
-            secondary
-            onClick={copy}
-            disabled={!editorRef.current || settings.codeResult.length === 0}
-          >
-            Copy
-          </Button>
+          {/* spacer */}
+          <div
+            css={css`
+              flex: 1;
+            `}
+          />
 
-          {/* exec button */}
-          <Button
-            onClick={exec}
-            disabled={
-              !editorRef.current ||
-              settings.codeResult.length === 0 ||
-              error.length > 0
-            }
-          >
-            Exec
-          </Button>
+          {/* clear button */}
+          {settings.codePrompt.length > 0 && (
+            <Text>
+              <Link href="#" onClick={onClearClick}>
+                Clear
+              </Link>
+            </Text>
+          )}
         </div>
       </div>
 
       {/* prompt */}
-      <Prompt type="code" />
+      <CodePrompt editor={editorRef.current} error={error} />
     </div>
   )
 }

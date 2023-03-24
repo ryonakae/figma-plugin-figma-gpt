@@ -1,21 +1,30 @@
 /** @jsx h */
-import { h, JSX, ComponentProps } from 'preact'
+import { JSX, ComponentProps } from 'preact'
 import { useState } from 'preact/hooks'
 
-import { Link, Muted } from '@create-figma-plugin/ui'
+import { IconButton, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
+import ReactMarkdown from 'react-markdown'
 import { useCopyToClipboard } from 'react-use'
+import rehypeHighlight, {
+  Options as rehypeHighlightOptions,
+} from 'rehype-highlight'
 
 import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
-import Icon from '@/ui/assets/img/icon.png'
+import { useStore } from '@/ui/Store'
+import IconCopyDark from '@/ui/assets/img/icon-copy-dark.svg'
+import IconCopyLight from '@/ui/assets/img/icon-copy-light.svg'
+import IconPlugin from '@/ui/assets/img/icon-plugin.png'
+import CodeBlockProps from '@/ui/components/CodeBlock'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
 export default function Message({ role, content, ...props }: MessageProps) {
   const [hover, setHover] = useState(false)
   const [_, copyToClipboard] = useCopyToClipboard()
+  const settings = useStore()
 
   function onMouseEnter() {
     setHover(true)
@@ -25,7 +34,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
     setHover(false)
   }
 
-  function onCopyClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
+  function onCopyClick(event: JSX.TargetedEvent<HTMLButtonElement>) {
     event.preventDefault()
     copyToClipboard(content)
     emit<NotifyHandler>('NOTIFY', {
@@ -37,10 +46,13 @@ export default function Message({ role, content, ...props }: MessageProps) {
     <div
       css={[
         css`
-          padding: var(--space-small) var(--space-medium);
+          background-color: var(--figma-color-bg);
+          padding-top: var(--space-small);
+          padding-right: var(--space-small);
+          padding-bottom: var(--space-small);
+          padding-left: var(--space-medium);
           display: flex;
-          gap: var(--space-small);
-          align-items: center;
+          align-items: flex-start;
           border-bottom: 1px solid var(--figma-color-bg-secondary);
         `,
         role === 'assistant' &&
@@ -88,7 +100,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
         )}
         {role === 'assistant' && (
           <img
-            src={Icon}
+            src={IconPlugin}
             css={css`
               width: 18px;
               height: auto;
@@ -99,34 +111,106 @@ export default function Message({ role, content, ...props }: MessageProps) {
       </div>
 
       {/* content */}
-      <span
+      <div
         css={css`
+          margin-left: var(--space-small);
+          margin-top: 8px;
           white-space: pre-wrap;
           word-break: break-word;
           flex: 1;
-          user-select: text;
+          overflow-x: auto;
+          display: flex;
+          flex-direction: column;
+          row-gap: 1em;
+
+          & * {
+            user-select: text;
+            cursor: auto;
+          }
+
+          & > * {
+            margin-top: 0;
+            margin-bottom: 0;
+          }
+
+          p {
+            code {
+              color: var(--figma-color-text-secondary);
+              font-family: 'Menlo, Monaco, "Courier New", monospace';
+
+              &::before,
+              &::after {
+                content: '\`';
+              }
+            }
+          }
+
+          ul,
+          ol {
+            padding-left: 1.5em;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5em;
+          }
         `}
       >
-        {content}
-      </span>
+        <ReactMarkdown
+          rehypePlugins={[
+            [
+              rehypeHighlight,
+              {
+                detect: true,
+                ignoreMissing: true,
+              } as rehypeHighlightOptions,
+            ],
+          ]}
+          components={{
+            pre({ node, className, children, ...props }) {
+              return (
+                <CodeBlockProps node={node} className={className}>
+                  {children}
+                </CodeBlockProps>
+              )
+            },
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
 
       {/* copy button */}
       <div
         css={css`
+          margin-left: var(--space-extra-small);
           display: flex;
           align-items: center;
           justify-content: center;
+          align-self: center;
+          visibility: ${hover ? 'visible' : 'hidden'};
+          pointer-events: ${hover ? 'auto' : 'none'};
         `}
       >
         <div
           css={css`
-            visibility: ${hover ? 'visible' : 'hidden'};
-            pointer-events: ${hover ? 'auto' : 'none'};
+            mix-blend-mode: ${settings.theme === 'dark'
+              ? 'screen'
+              : 'multiply'};
+
+            button {
+              width: 24px;
+              height: 24px;
+            }
           `}
         >
-          <Link href="#" onClick={onCopyClick}>
-            Copy
-          </Link>
+          <IconButton onClick={onCopyClick}>
+            <img
+              src={settings.theme === 'dark' ? IconCopyDark : IconCopyLight}
+              css={css`
+                width: 12px;
+                height: auto;
+              `}
+            />
+          </IconButton>
         </div>
       </div>
     </div>

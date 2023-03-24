@@ -18,7 +18,8 @@ import Chat from '@/ui/Chat'
 import Code from '@/ui/Code'
 import Setting from '@/ui/Setting'
 import { useStore } from '@/ui/Store'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
+import useTheme from '@/ui/hooks/useTheme'
 
 const tabOptions: Array<TabsOption> = [
   { children: <Chat />, value: 'Chat' },
@@ -31,6 +32,7 @@ export default function App() {
   const { updateSettings } = useSettings()
   const [tabValue, setTabValue] = useState<string | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const { watchTheme, updateTheme } = useTheme()
 
   function resizeWindow() {
     let height: number
@@ -76,6 +78,9 @@ export default function App() {
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
     })
+
+    updateTheme(document.documentElement)
+    watchTheme()
   })
 
   useUpdateEffect(() => {

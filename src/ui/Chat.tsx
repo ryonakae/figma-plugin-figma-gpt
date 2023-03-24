@@ -5,13 +5,15 @@ import { Link, Muted, Text } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ScrollToBottom from 'react-scroll-to-bottom'
+import { useMount, useUpdateEffect } from 'react-use'
 
 import { DEFAULT_SETTINGS } from '@/constants'
+import { Theme } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
+import ChatPrompt from '@/ui/components/ChatPrompt'
 import Message from '@/ui/components/Message'
-import Prompt from '@/ui/components/Prompt'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
 
 export default function Chat() {
   const settings = useStore()
@@ -29,6 +31,41 @@ export default function Chat() {
       message: 'Conversation cleared.',
     })
   }
+
+  function updateTheme(theme: Theme) {
+    console.log('updateTheme on chat', theme)
+
+    const oldLinkTag = document.getElementById('highlightjs-theme')
+    if (oldLinkTag && oldLinkTag.parentNode) {
+      oldLinkTag.parentNode.removeChild(oldLinkTag)
+    }
+
+    const linkTag = document.createElement('link')
+    linkTag.setAttribute('rel', 'stylesheet')
+    linkTag.setAttribute('id', 'highlightjs-theme')
+
+    if (theme === 'dark') {
+      linkTag.setAttribute(
+        'href',
+        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css'
+      )
+    } else {
+      linkTag.setAttribute(
+        'href',
+        'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css'
+      )
+    }
+
+    document.head.appendChild(linkTag)
+  }
+
+  useMount(() => {
+    updateTheme(settings.theme)
+  })
+
+  useUpdateEffect(() => {
+    updateTheme(settings.theme)
+  }, [settings.theme])
 
   return (
     <div
@@ -71,7 +108,7 @@ export default function Chat() {
           {settings.chatMessages.length > 0 && (
             <div
               css={css`
-                padding: var(--space-small);
+                padding: var(--space-extra-small);
                 text-align: center;
               `}
             >
@@ -126,7 +163,7 @@ export default function Chat() {
       </div>
 
       {/* prompt */}
-      <Prompt type="chat" />
+      <ChatPrompt />
     </div>
   )
 }

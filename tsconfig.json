@@ -5,10 +5,10 @@
     "typeRoots": ["node_modules/@figma", "node_modules/@types"],
     "paths": {
       "@/*": ["src/*"],
-      "react": ["node_modules/preact/compat/"],
+      // "react": ["node_modules/preact/compat/"],
+      "react/jsx-runtime": ["node_modules/preact/jsx-runtime/"],
       "react-dom": ["node_modules/preact/compat/"],
-      "react-dom/test-utils": ["node_modules/preact/test-utils/"],
-      "react/jsx-runtime": ["node_modules/preact/jsx-runtime/"]
+      "react-dom/test-utils": ["node_modules/preact/test-utils/"]
     },
     "skipLibCheck": true,
     "jsx": "react-jsx",

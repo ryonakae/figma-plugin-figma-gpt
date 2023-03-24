@@ -18,7 +18,7 @@ import { useMount } from 'react-use'
 import { ALL_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
-import { useSettings } from '@/ui/hooks'
+import useSettings from '@/ui/hooks/useSettings'
 
 export default function Setting() {
   const settings = useStore()
@@ -88,7 +88,7 @@ export default function Setting() {
 
   useMount(() => {
     updateMaxTokens({ type: 'chat', model: settings.chatModel })
-    updateMaxTokens({ type: 'code', model: settings.codeModel })
+    updateMaxTokens({ type: 'code', model: settings.codeModel0324 })
   })
 
   return (
@@ -172,7 +172,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.codeModel)}
+        maximum={getMaxTokens(settings.codeModel0324)}
         minimum={0}
         value={String(settings.codeMaxTokens)}
         onChange={onCodeMaxTokensChange}
@@ -270,7 +270,7 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* reset button */}
-      <Button fullWidth secondary onClick={onResetClick}>
+      <Button fullWidth danger onClick={onResetClick}>
         Reset parameters
       </Button>
     </div>
