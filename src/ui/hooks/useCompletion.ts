@@ -183,7 +183,6 @@ export default function useCompletion() {
         top_p: settings.topP,
         frequency_penalty: settings.frequencyPenalty,
         presence_penalty: settings.presencePenalty,
-        echo: true,
       } as OpenAiApiCodeRequest),
     })
       .then(async response => {
@@ -200,8 +199,8 @@ export default function useCompletion() {
         console.log(data)
 
         updateSettings({
-          codePrompt: DEFAULT_SETTINGS.codePrompt, // promptをクリア
-          codeResult: data.choices[0].text.trim(),
+          // codePrompt: DEFAULT_SETTINGS.codePrompt, // promptをクリア
+          codePrompt: useStore.getState().codePrompt + data.choices[0].text, // promptに追加
           codeTotalTokens: data.usage.total_tokens,
         })
       })
