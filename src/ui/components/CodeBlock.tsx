@@ -5,8 +5,6 @@ import { css } from '@emotion/react'
 import { ReactNode } from 'react'
 import { Element } from 'react-markdown/lib/rehype-filter'
 
-// import '!highlight.js/styles/github.css'
-
 type CodeBlockProps = {
   node: Element
   className?: string
@@ -31,11 +29,11 @@ export default function CodeBlock({
           padding: 0.5em 1em;
           background-color: var(--figma-color-bg-disabled);
           display: flex;
-          justify-content: space-between;
+          /* justify-content: space-between; */
         `}
       >
         <span>Code</span>
-        <span>Copy code</span>
+        {/* <span>Copy code</span> */}
       </div>
       <div
         css={css`

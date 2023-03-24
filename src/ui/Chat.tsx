@@ -108,7 +108,7 @@ export default function Chat() {
           {settings.chatMessages.length > 0 && (
             <div
               css={css`
-                padding: var(--space-small);
+                padding: var(--space-extra-small);
                 text-align: center;
               `}
             >
