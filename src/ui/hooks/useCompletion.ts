@@ -1,5 +1,3 @@
-import { StateUpdater } from 'preact/hooks'
-
 import { emit } from '@create-figma-plugin/utilities'
 import { dropRight } from 'lodash'
 
@@ -30,15 +28,18 @@ export default function useCompletion() {
     })
   }
 
-  async function chatCompletion(setLoading: StateUpdater<boolean>) {
-    setLoading(true)
+  async function chatCompletion() {
+    updateSettings({ loading: true })
 
-    const prompt = settings.chatPrompt
+    const prompt = useStore.getState().chatPrompt
     const message: ChatMessage = {
       role: 'user',
       content: prompt,
     }
-    const messages: ChatMessage[] = [...settings.chatMessages, message]
+    const messages: ChatMessage[] = [
+      ...useStore.getState().chatMessages,
+      message,
+    ]
 
     updateSettings({
       chatMessages: messages,
@@ -159,14 +160,14 @@ export default function useCompletion() {
       })
       .catch(onError)
       .finally(() => {
-        setLoading(false)
+        updateSettings({ loading: false })
       })
   }
 
-  async function codeCompletion(setLoading: StateUpdater<boolean>) {
-    setLoading(true)
+  async function codeCompletion() {
+    updateSettings({ loading: true })
 
-    const prompt = settings.codePrompt
+    const prompt = useStore.getState().codePrompt
 
     fetch('https://api.openai.com/v1/completions', {
       method: 'POST',
@@ -199,7 +200,6 @@ export default function useCompletion() {
         console.log(data)
 
         updateSettings({
-          // codePrompt: DEFAULT_SETTINGS.codePrompt, // promptをクリア
           codePrompt: useStore.getState().codePrompt + data.choices[0].text, // promptに追加
           codeTotalTokens: data.usage.total_tokens,
         })
@@ -214,7 +214,7 @@ export default function useCompletion() {
         })
       })
       .finally(() => {
-        setLoading(false)
+        updateSettings({ loading: false })
       })
   }
 

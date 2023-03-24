@@ -1,22 +1,12 @@
 /** @jsx h */
-import { h, Fragment, JSX } from 'preact'
+import { h, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
-import {
-  Button,
-  Divider,
-  Dropdown,
-  DropdownOption,
-  Link,
-  Muted,
-  Text,
-} from '@create-figma-plugin/ui'
-import { emit } from '@create-figma-plugin/utilities'
+import { DropdownOption, Link, Text } from '@create-figma-plugin/ui'
 import { css } from '@emotion/react'
 import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
-import { encode } from 'gpt-3-encoder'
 import * as monaco from 'monaco-editor'
-import { useCopyToClipboard, useUnmount, useUpdateEffect } from 'react-use'
+import { useUnmount, useUpdateEffect } from 'react-use'
 
 import {
   CODE_EDITOR_DEFAULT_OPTIONS,
@@ -25,9 +15,9 @@ import {
   CODE_MODELS,
 } from '@/constants'
 import { Theme } from '@/types/common'
-import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
+import CodePrompt from '@/ui/components/CodePrompt'
 import useCompletion from '@/ui/hooks/useCompletion'
 import useSettings from '@/ui/hooks/useSettings'
 
@@ -44,17 +34,14 @@ loader.config({
 
 export default function Code() {
   const settings = useStore()
-  const { updateSettings, updateMaxTokens } = useSettings()
+  const { updateSettings } = useSettings()
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>()
   const monacoRef = useRef<Monaco>()
   const modelRef = useRef<monaco.editor.ITextModel>()
   const [error, setError] = useState<monaco.editor.IMarker[]>([])
   const errorRef = useRef<monaco.editor.IMarker[]>([])
   const [editorMounted, setEditorMounted] = useState(false)
-  const [_, copyToClipboard] = useCopyToClipboard()
-  const [loading, setLoading] = useState(false)
   const { codeCompletion } = useCompletion()
-  const [tokens, setTokens] = useState(0)
 
   function beforeMount(monaco: Monaco) {
     console.log('CodeEditor beforeMount', monaco)
@@ -104,13 +91,10 @@ export default function Code() {
     // テーマの更新
     updateTheme(settings.theme)
 
-    // トークンの更新
-    updateTokens(settings.codePrompt)
-
     // キーボードショートカットの設定
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, handler => {
       console.log('CodeEditor cmd + enter pressed at inner of editor', handler)
-      if (!editorRef.current || settings.codePrompt.length === 0) {
+      if (!editorRef.current || useStore.getState().codePrompt.length === 0) {
         console.log('submit aborted')
         return
       }
@@ -126,38 +110,13 @@ export default function Code() {
   ) {
     console.log('CodeEditor onChange', value, event)
     updateSettings({
-      codePrompt: value || '',
+      codePrompt: value,
     })
   }
 
   function onValidate(markers: monaco.editor.IMarker[]) {
     console.log('CodeEditor onValidate', markers)
     setError(markers)
-  }
-
-  function exec() {
-    if (!editorRef.current) {
-      return
-    }
-
-    console.log('exec')
-
-    const tsCode = editorRef.current.getValue()
-    console.log(tsCode)
-    const jsCode = ts.transpile(tsCode)
-    console.log(jsCode)
-
-    emit<ExecHandler>('EXEC', jsCode)
-    emit<NotifyHandler>('NOTIFY', {
-      message: 'Code has been executed.',
-    })
-  }
-
-  function onCopyClick() {
-    copyToClipboard(settings.codePrompt)
-    emit<NotifyHandler>('NOTIFY', {
-      message: 'Copied code to clipboard.',
-    })
   }
 
   function updateTheme(theme: Theme) {
@@ -181,19 +140,8 @@ export default function Code() {
     })
   }
 
-  function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
-    const model = event.currentTarget.value
-    updateSettings({ codeModel0324: model })
-    updateMaxTokens({ type: 'code', model: model })
-  }
-
   function submit() {
-    codeCompletion(setLoading)
-  }
-
-  function updateTokens(prompt: string) {
-    const encodedPrompt = encode(prompt)
-    setTokens(encodedPrompt.length)
+    codeCompletion()
   }
 
   useUnmount(() => {
@@ -210,10 +158,6 @@ export default function Code() {
   useUpdateEffect(() => {
     updateTheme(settings.theme)
   }, [settings.theme])
-
-  useUpdateEffect(() => {
-    updateTokens(settings.codePrompt)
-  }, [settings.codePrompt, settings.codeTotalTokens])
 
   return (
     <div
@@ -287,107 +231,8 @@ export default function Code() {
         </div>
       </div>
 
-      {/* bottom area */}
-      <Fragment>
-        <Divider />
-
-        {/* buttons */}
-        <div
-          css={css`
-            padding: var(--space-extra-small) var(--space-medium);
-            display: flex;
-            gap: var(--space-extra-small);
-          `}
-        >
-          {/* copy button */}
-          <Button
-            secondary
-            onClick={onCopyClick}
-            disabled={!editorRef.current || settings.codePrompt.length === 0}
-          >
-            Copy
-          </Button>
-
-          {/* exec button */}
-          <Button
-            onClick={exec}
-            disabled={
-              !editorRef.current ||
-              settings.codePrompt.length === 0 ||
-              error.length > 0
-            }
-          >
-            Exec
-          </Button>
-
-          {/* spacer */}
-          <div
-            css={css`
-              flex: 1;
-            `}
-          />
-
-          {/* submit button */}
-          <div
-            css={css`
-              width: 72px;
-            `}
-          >
-            <Button
-              fullWidth
-              onClick={submit}
-              loading={loading}
-              disabled={
-                loading || !settings.apiKey || settings.codePrompt.length === 0
-              }
-            >
-              Submit
-            </Button>
-          </div>
-        </div>
-
-        <Divider />
-
-        {/* current model and tokens */}
-        <div
-          css={css`
-            padding: var(--space-extra-small) var(--space-medium);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          `}
-        >
-          {/* model */}
-          <div
-            css={css`
-              width: 144px;
-            `}
-          >
-            <Dropdown
-              onChange={onModelChange}
-              options={codeModelOptions}
-              value={settings.codeModel0324 || DEFAULT_SETTINGS.codeModel0324}
-              variant="border"
-              style={{
-                justifyContent: 'space-between',
-              }}
-            />
-          </div>
-
-          {/* tokens */}
-          <Text>
-            <Muted>
-              <span
-                css={css`
-                  font-variant-numeric: tabular-nums;
-                `}
-              >
-                {tokens} tokens
-              </span>
-            </Muted>
-          </Text>
-        </div>
-      </Fragment>
+      {/* prompt */}
+      <CodePrompt editor={editorRef.current} error={error} />
     </div>
   )
 }

@@ -50,6 +50,7 @@ export default function CodeBlock({
 
             code,
             code.hljs {
+              font-family: 'Menlo, Monaco, "Courier New", monospace';
               display: block;
               padding: 0;
               hyphens: none;

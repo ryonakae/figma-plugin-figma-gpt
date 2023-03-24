@@ -136,6 +136,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           p {
             code {
               color: var(--figma-color-text-secondary);
+              font-family: 'Menlo, Monaco, "Courier New", monospace';
 
               &::before,
               &::after {

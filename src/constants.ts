@@ -11,6 +11,7 @@ export const DEFAULT_SETTINGS: Settings = {
   // common
   theme: 'light',
   lastOpenTab: 'Chat',
+  loading: false,
   apiKey: '',
   temperature: 0.7,
   topP: 1,
@@ -29,7 +30,6 @@ export const DEFAULT_SETTINGS: Settings = {
   codeModel0324: 'text-davinci-003',
   codeMaxTokens: 1024,
   codePrompt: '',
-  codeResult: '',
   codeTotalTokens: 0,
 }
 

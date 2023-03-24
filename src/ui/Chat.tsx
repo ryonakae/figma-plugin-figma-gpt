@@ -11,8 +11,8 @@ import { DEFAULT_SETTINGS } from '@/constants'
 import { Theme } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
+import ChatPrompt from '@/ui/components/ChatPrompt'
 import Message from '@/ui/components/Message'
-import Prompt from '@/ui/components/Prompt'
 import useSettings from '@/ui/hooks/useSettings'
 
 export default function Chat() {
@@ -163,7 +163,7 @@ export default function Chat() {
       </div>
 
       {/* prompt */}
-      <Prompt type="chat" />
+      <ChatPrompt />
     </div>
   )
 }

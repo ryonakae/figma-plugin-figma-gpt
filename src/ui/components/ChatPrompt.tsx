@@ -18,74 +18,23 @@ import { encode } from 'gpt-3-encoder'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
-import { CHAT_MODELS, CODE_MODELS, DEFAULT_SETTINGS } from '@/constants'
+import { CHAT_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { useStore } from '@/ui/Store'
 import useCompletion from '@/ui/hooks/useCompletion'
 import useSettings from '@/ui/hooks/useSettings'
-
-type PromptProps = {
-  type: 'chat' | 'code'
-}
 
 const chatModelOptions: Array<DropdownOption> = []
 CHAT_MODELS.map(model => {
   chatModelOptions.push({ value: model.model })
 })
 
-const codeModelOptions: Array<DropdownOption> = []
-CODE_MODELS.map(model => {
-  codeModelOptions.push({ value: model.model })
-})
-
-export default function Prompt({ type }: PromptProps) {
+export default function Prompt() {
   const settings = useStore()
   const [focusPrompt, setFocusPropmt] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const loadingRef = useRef(false)
   const [promptTokens, setPromptTokens] = useState(0)
   const initialFocus = useInitialFocus()
   const { updateSettings, updateMaxTokens } = useSettings()
-  const { chatCompletion, codeCompletion } = useCompletion()
-
-  function getPromptPlaceholder() {
-    if (type === 'chat') {
-      return 'Think of a tagline for the corporate website.'
-    } else if (type === 'code') {
-      return '/* Create 10 random-sized rectangles using Figma Plugin API. */'
-    } else {
-      return ''
-    }
-  }
-
-  function getPromptValue() {
-    if (type === 'chat') {
-      return settings.chatPrompt
-    } else if (type === 'code') {
-      return settings.codePrompt
-    } else {
-      return ''
-    }
-  }
-
-  function getButtonDisabled() {
-    if (type === 'chat') {
-      return loading || !settings.apiKey || settings.chatPrompt.length === 0
-    } else if (type === 'code') {
-      return loading || !settings.apiKey || settings.codePrompt.length === 0
-    } else {
-      return false
-    }
-  }
-
-  function getTotalTokens() {
-    if (type === 'chat') {
-      return settings.chatTotalTokens
-    } else if (type === 'code') {
-      return settings.codeTotalTokens
-    } else {
-      return ''
-    }
-  }
+  const { chatCompletion } = useCompletion()
 
   function onPromptFocus() {
     console.log('onPromptFocus')
@@ -98,48 +47,29 @@ export default function Prompt({ type }: PromptProps) {
   }
 
   function onPromptInput(event: JSX.TargetedEvent<HTMLTextAreaElement>) {
-    if (type === 'chat') {
-      updateSettings({ chatPrompt: event.currentTarget.value })
-    } else if (type === 'code') {
-      updateSettings({ codePrompt: event.currentTarget.value })
-    }
+    updateSettings({ chatPrompt: event.currentTarget.value })
   }
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const model = event.currentTarget.value
-    if (type === 'chat') {
-      updateSettings({ chatModel: model })
-      updateMaxTokens({ type: 'chat', model: model })
-    } else if (type === 'code') {
-      updateSettings({ codeModel0324: model })
-      updateMaxTokens({ type: 'code', model: model })
-    }
+    updateSettings({ chatModel: model })
+    updateMaxTokens({ type: 'chat', model: model })
   }
 
   function onSubmitClick() {
-    if (type === 'chat') {
-      chatCompletion(setLoading)
-    } else if (type === 'code') {
-      codeCompletion(setLoading)
-    }
+    chatCompletion()
   }
 
   useHotkeys(
     ['meta+enter', 'ctrl+enter'],
     (event, handler) => {
-      let length = 0
-
-      if (type === 'chat') {
-        length = settings.chatPrompt.length
-      } else if (type === 'code') {
-        length = settings.codePrompt.length
-      }
+      const length = settings.chatPrompt.length
 
       if (
         !focusPrompt ||
         !settings.apiKey ||
         length === 0 ||
-        loadingRef.current
+        useStore.getState().loading
       ) {
         console.log('aborted')
         return
@@ -157,10 +87,6 @@ export default function Prompt({ type }: PromptProps) {
     const encodedPrompt = encode(settings.chatPrompt)
     setPromptTokens(encodedPrompt.length)
   }, [settings.chatPrompt])
-
-  useUpdateEffect(() => {
-    loadingRef.current = loading
-  }, [loading])
 
   return (
     <Fragment>
@@ -199,11 +125,11 @@ export default function Prompt({ type }: PromptProps) {
               {...initialFocus}
               variant="border"
               grow
-              value={getPromptValue()}
+              value={settings.chatPrompt}
               onInput={onPromptInput}
               rows={1}
-              disabled={loading}
-              placeholder={getPromptPlaceholder()}
+              disabled={settings.loading}
+              placeholder="Think of a tagline for the corporate website."
             />
           </div>
 
@@ -219,8 +145,12 @@ export default function Prompt({ type }: PromptProps) {
             <Button
               fullWidth
               onClick={onSubmitClick}
-              loading={loading}
-              disabled={getButtonDisabled()}
+              loading={settings.loading}
+              disabled={
+                settings.loading ||
+                !settings.apiKey ||
+                settings.chatPrompt.length === 0
+              }
             >
               Submit
             </Button>
@@ -242,28 +172,15 @@ export default function Prompt({ type }: PromptProps) {
               width: 144px;
             `}
           >
-            {type === 'chat' && (
-              <Dropdown
-                onChange={onModelChange}
-                options={chatModelOptions}
-                value={settings.chatModel || DEFAULT_SETTINGS.chatModel}
-                variant="border"
-                style={{
-                  justifyContent: 'space-between',
-                }}
-              />
-            )}
-            {type === 'code' && (
-              <Dropdown
-                onChange={onModelChange}
-                options={codeModelOptions}
-                value={settings.codeModel0324 || DEFAULT_SETTINGS.codeModel0324}
-                variant="border"
-                style={{
-                  justifyContent: 'space-between',
-                }}
-              />
-            )}
+            <Dropdown
+              onChange={onModelChange}
+              options={chatModelOptions}
+              value={settings.chatModel || DEFAULT_SETTINGS.chatModel}
+              variant="border"
+              style={{
+                justifyContent: 'space-between',
+              }}
+            />
           </div>
 
           <Text>
@@ -277,7 +194,7 @@ export default function Prompt({ type }: PromptProps) {
               >
                 <span>Prompt: {promptTokens} tokens</span>
                 <span>/</span>
-                <span>Total: {getTotalTokens()} tokens</span>
+                <span>Total: {settings.chatTotalTokens} tokens</span>
               </span>
             </Muted>
           </Text>
