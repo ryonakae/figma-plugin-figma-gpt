@@ -270,7 +270,7 @@ export default function Setting() {
       <VerticalSpace space="medium" />
 
       {/* reset button */}
-      <Button fullWidth secondary onClick={onResetClick}>
+      <Button fullWidth danger onClick={onResetClick}>
         Reset parameters
       </Button>
     </div>
