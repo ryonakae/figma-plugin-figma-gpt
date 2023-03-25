@@ -3,6 +3,7 @@ import { h, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
 import { DropdownOption, Link, Text } from '@create-figma-plugin/ui'
+import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
@@ -15,6 +16,7 @@ import {
   CODE_MODELS,
 } from '@/constants'
 import { Theme } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
 import CodePrompt from '@/ui/components/CodePrompt'
@@ -141,6 +143,10 @@ export default function Code() {
     updateSettings({
       codePrompt: DEFAULT_SETTINGS.codePrompt,
       codeTotalTokens: DEFAULT_SETTINGS.codeTotalTokens,
+    })
+
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Code cleared.',
     })
   }
 
