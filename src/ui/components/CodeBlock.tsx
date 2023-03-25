@@ -1,6 +1,5 @@
 /** @jsx h */
 import { h, JSX } from 'preact'
-import { useState } from 'preact/hooks'
 
 import { Link, Text } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
@@ -11,37 +10,26 @@ import {
   Element,
   Text as TextElement,
 } from 'react-markdown/lib/ast-to-react'
-// import { Element } from 'react-markdown/lib/rehype-filter'
-import { useMount, useCopyToClipboard } from 'react-use'
+import { useMount, useCopyToClipboard, useUnmount } from 'react-use'
 
 import { NotifyHandler } from '@/types/eventHandler'
 
 type CodeBlockProps = {
   node: Element
-  className?: string
   children: ReactNode | ReactNode[]
 }
 
-export default function CodeBlock({
-  node,
-  className,
-  children,
-}: CodeBlockProps) {
-  const [language, setLanguage] = useState('')
+function isElement(elementContent: ElementContent): elementContent is Element {
+  return elementContent.type === 'element'
+}
+
+function isText(elementContent: ElementContent): elementContent is TextElement {
+  return elementContent.type === 'text'
+}
+
+export default function CodeBlock({ node, children }: CodeBlockProps) {
   const [_, copyToClipboard] = useCopyToClipboard()
-
-  function isElement(
-    elementContent: ElementContent
-  ): elementContent is Element {
-    return elementContent.type === 'element'
-  }
-
-  function isText(
-    elementContent: ElementContent
-  ): elementContent is TextElement {
-    console.log('isText', elementContent.type)
-    return elementContent.type === 'text'
-  }
+  const language = getCodeLanguage(node.children[0])
 
   function getCodeLanguage(elementContent: ElementContent) {
     if (!isElement(elementContent)) {
@@ -51,7 +39,14 @@ export default function CodeBlock({
       return ''
     }
 
-    const classNames = elementContent.properties.className as string[]
+    const classNames = elementContent.properties.className as
+      | string[]
+      | undefined
+
+    if (!classNames) {
+      return ''
+    }
+
     const language = classNames.find(className => {
       return className.startsWith('language-')
     })
@@ -98,9 +93,11 @@ export default function CodeBlock({
   }
 
   useMount(() => {
-    console.log('CodeBlock mounted', node, className, children)
-    setLanguage(getCodeLanguage(node.children[0]))
-    console.log('getCode', getCode(node.children[0]))
+    console.log('CodeBlock mounted', node, children)
+  })
+
+  useUnmount(() => {
+    console.log('CodeBlock unmounted', node, children)
   })
 
   return (
@@ -109,7 +106,6 @@ export default function CodeBlock({
         border-radius: var(--border-radius-6);
         overflow: hidden;
       `}
-      className={className}
     >
       <div
         css={css`
@@ -118,6 +114,7 @@ export default function CodeBlock({
           display: flex;
           align-items: center;
           justify-content: space-between;
+          height: 24px;
         `}
       >
         <span>{language || ''}</span>
