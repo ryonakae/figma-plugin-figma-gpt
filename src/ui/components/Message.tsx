@@ -17,7 +17,7 @@ import { useStore } from '@/ui/Store'
 import IconCopyDark from '@/ui/assets/img/icon-copy-dark.svg'
 import IconCopyLight from '@/ui/assets/img/icon-copy-light.svg'
 import IconPlugin from '@/ui/assets/img/icon-plugin.png'
-import CodeBlockProps from '@/ui/components/CodeBlock'
+import CodeBlock from '@/ui/components/CodeBlock'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
@@ -123,7 +123,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           flex-direction: column;
           row-gap: 1em;
 
-          & * {
+          & *:not(a) {
             user-select: text;
             cursor: auto;
           }
@@ -167,9 +167,9 @@ export default function Message({ role, content, ...props }: MessageProps) {
           components={{
             pre({ node, className, children, ...props }) {
               return (
-                <CodeBlockProps node={node} className={className}>
+                <CodeBlock node={node} className={className}>
                   {children}
-                </CodeBlockProps>
+                </CodeBlock>
               )
             },
           }}
