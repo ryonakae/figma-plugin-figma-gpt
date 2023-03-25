@@ -32,8 +32,6 @@ export default function useTheme() {
       attributes: true,
       attributeFilter: ['class'],
     })
-
-    updateTheme(document.documentElement)
   }
 
   useUnmount(() => {
