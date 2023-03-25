@@ -1,39 +1,128 @@
 /** @jsx h */
-import { h } from 'preact'
+import { h, JSX } from 'preact'
 
+import { Link, Text } from '@create-figma-plugin/ui'
+import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import { ReactNode } from 'react'
-import { Element } from 'react-markdown/lib/rehype-filter'
+import {
+  ElementContent,
+  Element,
+  Text as TextElement,
+} from 'react-markdown/lib/ast-to-react'
+import { useMount, useCopyToClipboard, useUnmount } from 'react-use'
+
+import { NotifyHandler } from '@/types/eventHandler'
 
 type CodeBlockProps = {
   node: Element
-  className?: string
   children: ReactNode | ReactNode[]
 }
 
-export default function CodeBlock({
-  node,
-  className,
-  children,
-}: CodeBlockProps) {
+function isElement(elementContent: ElementContent): elementContent is Element {
+  return elementContent.type === 'element'
+}
+
+function isText(elementContent: ElementContent): elementContent is TextElement {
+  return elementContent.type === 'text'
+}
+
+export default function CodeBlock({ node, children }: CodeBlockProps) {
+  const [_, copyToClipboard] = useCopyToClipboard()
+  const language = getCodeLanguage(node.children[0])
+
+  function getCodeLanguage(elementContent: ElementContent) {
+    if (!isElement(elementContent)) {
+      return ''
+    }
+    if (!elementContent.properties) {
+      return ''
+    }
+
+    const classNames = elementContent.properties.className as
+      | string[]
+      | undefined
+
+    if (!classNames) {
+      return ''
+    }
+
+    const language = classNames.find(className => {
+      return className.startsWith('language-')
+    })
+
+    if (!language) {
+      return ''
+    }
+
+    const languageName = language.replace('language-', '')
+    return languageName
+  }
+
+  function getCode(elementContent: ElementContent) {
+    if (!isElement(elementContent)) {
+      return ''
+    }
+    if (!elementContent.properties) {
+      return ''
+    }
+
+    let code = ''
+
+    elementContent.children.map(child => {
+      if (isText(child)) {
+        code += child.value
+      } else if (isElement(child)) {
+        const grandChild = child.children[0] as TextElement | undefined
+        if (grandChild && isText(grandChild)) {
+          code += grandChild.value
+        }
+      }
+    })
+
+    return code
+  }
+
+  function onCopyClick(event: JSX.TargetedEvent<HTMLAnchorElement>) {
+    event.preventDefault()
+    const code = getCode(node.children[0])
+    copyToClipboard(code)
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Copied to clipboard.',
+    })
+  }
+
+  useMount(() => {
+    console.log('CodeBlock mounted', node, children)
+  })
+
+  useUnmount(() => {
+    console.log('CodeBlock unmounted', node, children)
+  })
+
   return (
     <div
       css={css`
         border-radius: var(--border-radius-6);
         overflow: hidden;
       `}
-      className={className}
     >
       <div
         css={css`
           padding: 0.5em 1em;
           background-color: var(--figma-color-bg-disabled);
           display: flex;
-          /* justify-content: space-between; */
+          align-items: center;
+          justify-content: space-between;
+          height: 24px;
         `}
       >
-        <span>Code</span>
-        {/* <span>Copy code</span> */}
+        <span>{language || ''}</span>
+        <Text>
+          <Link href="#" onClick={onCopyClick}>
+            Copy
+          </Link>
+        </Text>
       </div>
       <div
         css={css`

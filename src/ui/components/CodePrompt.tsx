@@ -60,7 +60,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
   function onCopyClick() {
     copyToClipboard(settings.codePrompt)
     emit<NotifyHandler>('NOTIFY', {
-      message: 'Copied code to clipboard.',
+      message: 'Copied to clipboard.',
     })
   }
 

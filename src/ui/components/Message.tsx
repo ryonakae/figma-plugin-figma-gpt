@@ -1,12 +1,12 @@
 /** @jsx h */
 import { JSX, ComponentProps } from 'preact'
-import { useState } from 'preact/hooks'
+import { useMemo, useState } from 'preact/hooks'
 
 import { IconButton, Muted } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ReactMarkdown from 'react-markdown'
-import { useCopyToClipboard } from 'react-use'
+import { useCopyToClipboard, useMount, useUnmount } from 'react-use'
 import rehypeHighlight, {
   Options as rehypeHighlightOptions,
 } from 'rehype-highlight'
@@ -17,7 +17,7 @@ import { useStore } from '@/ui/Store'
 import IconCopyDark from '@/ui/assets/img/icon-copy-dark.svg'
 import IconCopyLight from '@/ui/assets/img/icon-copy-light.svg'
 import IconPlugin from '@/ui/assets/img/icon-plugin.png'
-import CodeBlockProps from '@/ui/components/CodeBlock'
+import CodeBlock from '@/ui/components/CodeBlock'
 
 type MessageProps = ComponentProps<'div'> & ChatMessage
 
@@ -41,6 +41,14 @@ export default function Message({ role, content, ...props }: MessageProps) {
       message: 'Copied to clipboard.',
     })
   }
+
+  useMount(() => {
+    console.log('Message mounted', content)
+  })
+
+  useUnmount(() => {
+    console.log('Message unmounted', content)
+  })
 
   return (
     <div
@@ -123,7 +131,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           flex-direction: column;
           row-gap: 1em;
 
-          & * {
+          & *:not(a) {
             user-select: text;
             cursor: auto;
           }
@@ -159,17 +167,16 @@ export default function Message({ role, content, ...props }: MessageProps) {
             [
               rehypeHighlight,
               {
-                detect: true,
+                detect: true, // 自動で言語を判別するが、あんまり精度よくない
                 ignoreMissing: true,
               } as rehypeHighlightOptions,
             ],
           ]}
           components={{
-            pre({ node, className, children, ...props }) {
-              return (
-                <CodeBlockProps node={node} className={className}>
-                  {children}
-                </CodeBlockProps>
+            pre({ node, children, ...props }) {
+              return useMemo(
+                () => <CodeBlock node={node}>{children}</CodeBlock>,
+                [node, children]
               )
             },
           }}
@@ -185,7 +192,7 @@ export default function Message({ role, content, ...props }: MessageProps) {
           display: flex;
           align-items: center;
           justify-content: center;
-          align-self: center;
+          height: 32px;
           visibility: ${hover ? 'visible' : 'hidden'};
           pointer-events: ${hover ? 'auto' : 'none'};
         `}

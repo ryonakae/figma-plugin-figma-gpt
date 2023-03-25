@@ -3,6 +3,7 @@ import { h, JSX } from 'preact'
 import { useRef, useState } from 'preact/hooks'
 
 import { DropdownOption, Link, Text } from '@create-figma-plugin/ui'
+import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
 import ReactMonacoEditor, { loader, Monaco } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
@@ -15,6 +16,7 @@ import {
   CODE_MODELS,
 } from '@/constants'
 import { Theme } from '@/types/common'
+import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import figmaTypings from '@/ui/assets/types/figma.dts'
 import CodePrompt from '@/ui/components/CodePrompt'
@@ -39,7 +41,6 @@ export default function Code() {
   const monacoRef = useRef<Monaco>()
   const modelRef = useRef<monaco.editor.ITextModel>()
   const [error, setError] = useState<monaco.editor.IMarker[]>([])
-  const errorRef = useRef<monaco.editor.IMarker[]>([])
   const [editorMounted, setEditorMounted] = useState(false)
   const { codeCompletion } = useCompletion()
 
@@ -70,8 +71,7 @@ export default function Code() {
       libUri
     )
 
-    // When resolving definitions and references, the editor will try to use created models.
-    // Creating a model for the library allows "peek definition/references" commands to work with the library.
+    // create model
     modelRef.current = monaco.editor.createModel(
       libSource,
       'typescript',
@@ -116,13 +116,19 @@ export default function Code() {
 
   function onValidate(markers: monaco.editor.IMarker[]) {
     console.log('CodeEditor onValidate', markers)
-    setError(markers)
+
+    // severityが8のものだけをerrorに入れる
+    const errors = markers.filter(marker => marker.severity === 8)
+
+    setError(errors)
   }
 
   function updateTheme(theme: Theme) {
     if (!monacoRef.current) {
       return
     }
+
+    console.log('updateTheme on CodeEditor', theme)
 
     if (theme === 'dark') {
       monacoRef.current.editor.setTheme('vs-dark')
@@ -138,6 +144,10 @@ export default function Code() {
       codePrompt: DEFAULT_SETTINGS.codePrompt,
       codeTotalTokens: DEFAULT_SETTINGS.codeTotalTokens,
     })
+
+    emit<NotifyHandler>('NOTIFY', {
+      message: 'Code cleared.',
+    })
   }
 
   function submit() {
@@ -152,10 +162,6 @@ export default function Code() {
   })
 
   useUpdateEffect(() => {
-    errorRef.current = error
-  }, [error])
-
-  useUpdateEffect(() => {
     updateTheme(settings.theme)
   }, [settings.theme])
 
@@ -167,11 +173,12 @@ export default function Code() {
         flex-direction: column;
       `}
     >
-      {/* chat area */}
+      {/* editor area */}
       <div
         css={css`
           flex: 1;
           opacity: ${editorMounted ? 1 : 0};
+          pointer-events: ${editorMounted ? 'auto' : 'none'};
           position: relative;
         `}
       >
@@ -185,7 +192,7 @@ export default function Code() {
           options={CODE_EDITOR_DEFAULT_OPTIONS}
         />
 
-        {/* buttons */}
+        {/* error and clear */}
         <div
           css={css`
             display: flex;

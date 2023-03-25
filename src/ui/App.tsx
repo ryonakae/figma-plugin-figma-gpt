@@ -73,14 +73,17 @@ export default function App() {
     document.body.appendChild(script)
   }
 
+  function onLoadSettings() {
+    updateTheme(document.documentElement)
+    watchTheme()
+  }
+
   useMount(() => {
     loadExternalScript()
     once<LoadSettingsHandler>('LOAD_SETTINGS', function (settings: Settings) {
       loadSettings(settings)
+      onLoadSettings()
     })
-
-    updateTheme(document.documentElement)
-    watchTheme()
   })
 
   useUpdateEffect(() => {
