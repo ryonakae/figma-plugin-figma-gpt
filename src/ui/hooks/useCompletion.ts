@@ -1,4 +1,5 @@
 import { emit } from '@create-figma-plugin/utilities'
+import { TiktokenModel } from 'js-tiktoken'
 import { dropRight } from 'lodash'
 
 import { DEFAULT_SETTINGS } from '@/constants'
@@ -13,10 +14,12 @@ import { ChatMessage } from '@/types/common'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import useSettings from '@/ui/hooks/useSettings'
+import useTikToken from '@/ui/hooks/useTikToken'
 
 export default function useCompletion() {
   const settings = useStore()
   const { updateSettings } = useSettings()
+  const { getTokensFromChatMessages } = useTikToken()
 
   function onError(err: Error) {
     console.error('err:', err.message)
@@ -32,18 +35,30 @@ export default function useCompletion() {
     updateSettings({ loading: true })
 
     const prompt = useStore.getState().chatPrompt
-    const message: ChatMessage = {
+    const systemMessage = useStore.getState().chatSystemMessage
+    const userMessage: ChatMessage = {
       role: 'user',
       content: prompt,
     }
-    const messages: ChatMessage[] = [
+    let messages: ChatMessage[] = [
       ...useStore.getState().chatMessages,
-      message,
+      userMessage,
     ]
 
     updateSettings({
       chatMessages: messages,
     })
+
+    // chatSystemMessageが設定されている場合にmessagesの最初に追加
+    if (systemMessage.length > 0) {
+      messages = [
+        {
+          role: 'system',
+          content: systemMessage,
+        },
+        ...messages,
+      ]
+    }
 
     fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -52,7 +67,7 @@ export default function useCompletion() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.chatModel,
+        model: settings.chatModel20231109,
         messages: messages,
         temperature: settings.temperature,
         max_tokens: settings.chatMaxTokens,
@@ -124,6 +139,14 @@ export default function useCompletion() {
               chatMessages: dropRight(useStore.getState().chatMessages),
             })
 
+            // chatTotalTokensを更新
+            updateSettings({
+              chatTotalTokens: getTokensFromChatMessages(
+                useStore.getState().chatMessages,
+                settings.chatModel20231109 as TiktokenModel
+              ).length,
+            })
+
             throw new Error(dataArray[0].error.message)
           }
 
@@ -151,6 +174,14 @@ export default function useCompletion() {
                 },
               ],
             })
+
+            // chatTotalTokensを更新
+            updateSettings({
+              chatTotalTokens: getTokensFromChatMessages(
+                useStore.getState().chatMessages,
+                settings.chatModel20231109 as TiktokenModel
+              ).length,
+            })
           })
 
           reader.read().then(readChunk).catch(onError)
@@ -176,7 +207,7 @@ export default function useCompletion() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.codeModel0324,
+        model: settings.codeModel20231109,
         prompt: prompt,
         temperature: settings.temperature,
         max_tokens: settings.codeMaxTokens,

@@ -18,14 +18,16 @@ export type Settings = {
   stop: string
 
   // chat
-  chatModel: string
+  chatModel20231109: string
   chatMaxTokens: number
   chatPrompt: string
   chatMessages: ChatMessage[]
   chatTotalTokens: number
+  chatSystemMessage: string
+  chatSystemMessageTokens: number
 
   // code
-  codeModel0324: string
+  codeModel20231109: string
   codeMaxTokens: number
   codePrompt: string
   codeTotalTokens: number

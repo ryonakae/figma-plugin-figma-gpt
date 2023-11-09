@@ -1,6 +1,6 @@
 /** @jsx h */
 import { h, JSX, Fragment } from 'preact'
-import { useRef, useState } from 'preact/hooks'
+import { useState } from 'preact/hooks'
 
 import {
   Divider,
@@ -14,7 +14,7 @@ import {
   Text,
 } from '@create-figma-plugin/ui'
 import { css } from '@emotion/react'
-import { encode } from 'gpt-3-encoder'
+import { TiktokenModel } from 'js-tiktoken'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useUpdateEffect } from 'react-use'
 
@@ -22,6 +22,7 @@ import { CHAT_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { useStore } from '@/ui/Store'
 import useCompletion from '@/ui/hooks/useCompletion'
 import useSettings from '@/ui/hooks/useSettings'
+import useTikToken from '@/ui/hooks/useTikToken'
 
 const chatModelOptions: Array<DropdownOption> = []
 CHAT_MODELS.map(model => {
@@ -35,6 +36,7 @@ export default function Prompt() {
   const initialFocus = useInitialFocus()
   const { updateSettings, updateMaxTokens } = useSettings()
   const { chatCompletion } = useCompletion()
+  const { getTokensFromString } = useTikToken()
 
   function onPromptFocus() {
     console.log('onPromptFocus')
@@ -52,7 +54,7 @@ export default function Prompt() {
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const model = event.currentTarget.value
-    updateSettings({ chatModel: model })
+    updateSettings({ chatModel20231109: model })
     updateMaxTokens({ type: 'chat', model: model })
   }
 
@@ -84,8 +86,11 @@ export default function Prompt() {
   )
 
   useUpdateEffect(() => {
-    const encodedPrompt = encode(settings.chatPrompt)
-    setPromptTokens(encodedPrompt.length)
+    const tokens = getTokensFromString(
+      settings.chatPrompt,
+      settings.chatModel20231109 as TiktokenModel
+    )
+    setPromptTokens(tokens.length)
   }, [settings.chatPrompt])
 
   return (
@@ -129,7 +134,7 @@ export default function Prompt() {
               onInput={onPromptInput}
               rows={1}
               disabled={settings.loading}
-              placeholder="Think of a tagline for the corporate website."
+              placeholder="Send message"
             />
           </div>
 
@@ -175,7 +180,9 @@ export default function Prompt() {
             <Dropdown
               onChange={onModelChange}
               options={chatModelOptions}
-              value={settings.chatModel || DEFAULT_SETTINGS.chatModel}
+              value={
+                settings.chatModel20231109 || DEFAULT_SETTINGS.chatModel20231109
+              }
               variant="border"
               style={{
                 justifyContent: 'space-between',
@@ -194,7 +201,11 @@ export default function Prompt() {
               >
                 <span>Prompt: {promptTokens} tokens</span>
                 <span>/</span>
-                <span>Total: {settings.chatTotalTokens} tokens</span>
+                <span>
+                  Total:{' '}
+                  {settings.chatTotalTokens + settings.chatSystemMessageTokens}{' '}
+                  tokens
+                </span>
               </span>
             </Muted>
           </Text>
