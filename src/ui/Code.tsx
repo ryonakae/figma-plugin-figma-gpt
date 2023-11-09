@@ -101,6 +101,9 @@ export default function Code() {
       submit()
     })
 
+    // focus editor
+    editor.focus()
+
     setEditorMounted(true)
   }
 

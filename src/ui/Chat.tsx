@@ -80,6 +80,7 @@ export default function Chat() {
         css={css`
           flex: 1;
           position: relative;
+          overflow: auto;
         `}
       >
         <ScrollToBottom

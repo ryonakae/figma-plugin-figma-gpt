@@ -20,14 +20,16 @@ export const DEFAULT_SETTINGS: Settings = {
   stop: '',
 
   // chat
-  chatModel: 'gpt-3.5-turbo',
+  chatModel20231109: 'gpt-3.5-turbo',
   chatMaxTokens: 1024,
   chatPrompt: '',
   chatMessages: [],
   chatTotalTokens: 0,
+  chatSystemMessage: '',
+  chatSystemMessageTokens: 0,
 
   // code
-  codeModel0324: 'text-davinci-003',
+  codeModel20231109: 'gpt-3.5-turbo-instruct',
   codeMaxTokens: 1024,
   codePrompt: '',
   codeTotalTokens: 0,
@@ -66,23 +68,13 @@ export const CODE_EDITOR_CDN_URL = 'https://wonderful-newton-c6b380.netlify.app'
 
 export const CHAT_MODELS: Model[] = [
   { model: 'gpt-4', maxTokens: 8192 },
-  { model: 'gpt-4-0314', maxTokens: 8192 },
   { model: 'gpt-4-32k', maxTokens: 32768 },
-  { model: 'gpt-4-32k-0314', maxTokens: 32768 },
   { model: 'gpt-3.5-turbo', maxTokens: 4096 },
-  { model: 'gpt-3.5-turbo-0301', maxTokens: 4096 },
+  { model: 'gpt-3.5-turbo-16k', maxTokens: 16385 },
 ]
 
 export const CODE_MODELS: Model[] = [
-  { model: 'text-davinci-003', maxTokens: 4096 },
-  { model: 'text-davinci-002', maxTokens: 4096 },
-  { model: 'text-curie-001', maxTokens: 2048 },
-  { model: 'text-babbage-001', maxTokens: 2048 },
-  { model: 'text-ada-001', maxTokens: 2048 },
-  { model: 'davinci', maxTokens: 2048 },
-  { model: 'curie', maxTokens: 2048 },
-  { model: 'babbage', maxTokens: 2048 },
-  { model: 'ada', maxTokens: 2048 },
+  { model: 'gpt-3.5-turbo-instruct', maxTokens: 4096 },
 ]
 
 export const ALL_MODELS = [...CHAT_MODELS, ...CODE_MODELS]

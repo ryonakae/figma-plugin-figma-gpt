@@ -58,6 +58,9 @@ export default function App() {
     console.log('loadSettings', settings)
     updateSettings(settings)
     setTabValue(settings.lastOpenTab)
+
+    // loadingのままプラグインを閉じてしまった場合対策
+    updateSettings({ loading: false })
   }
 
   function onTabChange(event: JSX.TargetedEvent<HTMLInputElement>) {

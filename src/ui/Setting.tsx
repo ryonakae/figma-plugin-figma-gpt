@@ -8,21 +8,25 @@ import {
   RangeSlider,
   Text,
   Textbox,
+  TextboxMultiline,
   TextboxNumeric,
   VerticalSpace,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
+import { TiktokenModel } from 'js-tiktoken'
 import { useMount } from 'react-use'
 
 import { ALL_MODELS, DEFAULT_SETTINGS } from '@/constants'
 import { NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import useSettings from '@/ui/hooks/useSettings'
+import useTikToken from '@/ui/hooks/useTikToken'
 
 export default function Setting() {
   const settings = useStore()
   const { updateSettings, updateMaxTokens } = useSettings()
+  const { getTokensFromString } = useTikToken()
 
   function onApiKeyInput(event: JSX.TargetedEvent<HTMLInputElement>) {
     updateSettings({ apiKey: event.currentTarget.value })
@@ -58,6 +62,19 @@ export default function Setting() {
     updateSettings({ presencePenalty: Number(event.currentTarget.value) })
   }
 
+  function onChatSystemMessageInput(
+    event: JSX.TargetedEvent<HTMLTextAreaElement>
+  ) {
+    const tokens = getTokensFromString(
+      event.currentTarget.value,
+      settings.chatModel20231109 as TiktokenModel
+    )
+    updateSettings({
+      chatSystemMessage: event.currentTarget.value,
+      chatSystemMessageTokens: tokens.length,
+    })
+  }
+
   function getMaxTokens(modelName: string) {
     const targetModel = ALL_MODELS.find(model => {
       return model.model === modelName
@@ -87,14 +104,16 @@ export default function Setting() {
   }
 
   useMount(() => {
-    updateMaxTokens({ type: 'chat', model: settings.chatModel })
-    updateMaxTokens({ type: 'code', model: settings.codeModel0324 })
+    updateMaxTokens({ type: 'chat', model: settings.chatModel20231109 })
+    updateMaxTokens({ type: 'code', model: settings.codeModel20231109 })
   })
 
   return (
     <div
       css={css`
+        height: 500px;
         padding: var(--space-medium);
+        overflow: auto;
       `}
     >
       {/* api key */}
@@ -138,10 +157,30 @@ export default function Setting() {
 
       <VerticalSpace space="medium" />
 
-      {/* maximum length (chat) */}
+      {/* chat system message */}
+      <div className="parameterTitle">
+        <Text>
+          <Muted>Chat system message (Custom Instructions)</Muted>
+        </Text>
+        <Text>
+          <Muted>{settings.chatSystemMessageTokens} tokens</Muted>
+        </Text>
+      </div>
+      <VerticalSpace space="extraSmall" />
+      <TextboxMultiline
+        grow
+        rows={5}
+        variant="border"
+        value={settings.chatSystemMessage}
+        onInput={onChatSystemMessageInput}
+      />
+
+      <VerticalSpace space="extraSmall" />
+
+      {/* chat maximum length */}
       <div className="parameterTitle withRangeSlider">
         <Text>
-          <Muted>Maximum length (Chat)</Muted>
+          <Muted>Chat maximum length</Muted>
         </Text>
         <div className="parameterTitleInput">
           <TextboxNumeric
@@ -152,16 +191,16 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.chatModel)}
+        maximum={getMaxTokens(settings.chatModel20231109)}
         minimum={0}
         value={String(settings.chatMaxTokens)}
         onChange={onChatMaxTokensChange}
       />
 
-      {/* maximum length (code) */}
+      {/* code maximum length */}
       <div className="parameterTitle withRangeSlider">
         <Text>
-          <Muted>Maximum length (Code)</Muted>
+          <Muted>Code maximum length</Muted>
         </Text>
         <div className="parameterTitleInput">
           <TextboxNumeric
@@ -172,7 +211,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.codeModel0324)}
+        maximum={getMaxTokens(settings.codeModel20231109)}
         minimum={0}
         value={String(settings.codeMaxTokens)}
         onChange={onCodeMaxTokensChange}

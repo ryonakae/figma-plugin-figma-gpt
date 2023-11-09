@@ -7,12 +7,12 @@ import {
   Divider,
   Dropdown,
   DropdownOption,
+  Link,
   Muted,
   Text,
 } from '@create-figma-plugin/ui'
 import { emit } from '@create-figma-plugin/utilities'
 import { css } from '@emotion/react'
-import { encode } from 'gpt-3-encoder'
 import * as monaco from 'monaco-editor'
 import { useCopyToClipboard, useMount, useUpdateEffect } from 'react-use'
 
@@ -21,6 +21,7 @@ import { ExecHandler, NotifyHandler } from '@/types/eventHandler'
 import { useStore } from '@/ui/Store'
 import useCompletion from '@/ui/hooks/useCompletion'
 import useSettings from '@/ui/hooks/useSettings'
+import useTikToken from '@/ui/hooks/useTikToken'
 
 type CodePromptProps = {
   editor: monaco.editor.IStandaloneCodeEditor | undefined
@@ -34,10 +35,11 @@ CODE_MODELS.map(model => {
 
 export default function CodePrompt({ editor, error }: CodePromptProps) {
   const settings = useStore()
+  const [tokens, setTokens] = useState(0)
   const { updateSettings, updateMaxTokens } = useSettings()
   const [_, copyToClipboard] = useCopyToClipboard()
   const { codeCompletion } = useCompletion()
-  const [tokens, setTokens] = useState(0)
+  const { getTokensFromString } = useTikToken()
 
   function exec() {
     if (!editor) {
@@ -66,7 +68,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const model = event.currentTarget.value
-    updateSettings({ codeModel0324: model })
+    updateSettings({ codeModel20231109: model })
     updateMaxTokens({ type: 'code', model: model })
   }
 
@@ -75,8 +77,12 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
   }
 
   function updateTokens(prompt: string) {
-    const encodedPrompt = encode(prompt)
-    setTokens(encodedPrompt.length)
+    // const tokens = getTokensFromString(
+    //   prompt,
+    //   settings.codeModel20231109 as TiktokenModel
+    // )
+    const tokens = getTokensFromString(prompt, 'gpt-3.5-turbo')
+    setTokens(tokens.length)
   }
 
   useMount(() => {
@@ -97,6 +103,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
           padding: var(--space-extra-small) var(--space-medium);
           display: flex;
           gap: var(--space-extra-small);
+          align-items: center;
         `}
       >
         {/* copy button */}
@@ -124,6 +131,13 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
             flex: 1;
           `}
         />
+
+        {/* help link */}
+        <Text>
+          <Link href="https://www.figma.com/plugin-docs/" target="_blank">
+            Figma Plugin API docs
+          </Link>
+        </Text>
 
         {/* submit button */}
         <div
@@ -166,7 +180,9 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
           <Dropdown
             onChange={onModelChange}
             options={codeModelOptions}
-            value={settings.codeModel0324 || DEFAULT_SETTINGS.codeModel0324}
+            value={
+              settings.codeModel20231109 || DEFAULT_SETTINGS.codeModel20231109
+            }
             variant="border"
             style={{
               justifyContent: 'space-between',
