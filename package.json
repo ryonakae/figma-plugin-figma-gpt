@@ -57,6 +57,11 @@
         "main": "src/main/index.ts",
         "ui": "src/ui/index.tsx"
       }
+    },
+    "networkAccess": {
+      "allowedDomains": [
+        "api.openai.com"
+      ]
     }
   },
   "lint-staged": {
