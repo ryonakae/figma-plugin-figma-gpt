@@ -54,7 +54,7 @@ export default function Prompt() {
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const model = event.currentTarget.value
-    updateSettings({ chatModel20231109: model })
+    updateSettings({ chatModel20240724: model })
     updateMaxTokens({ type: 'chat', model: model })
   }
 
@@ -88,7 +88,7 @@ export default function Prompt() {
   useUpdateEffect(() => {
     const tokens = getTokensFromString(
       settings.chatPrompt,
-      settings.chatModel20231109 as TiktokenModel
+      settings.chatModel20240724 as TiktokenModel
     )
     setPromptTokens(tokens.length)
   }, [settings.chatPrompt])
@@ -181,7 +181,7 @@ export default function Prompt() {
               onChange={onModelChange}
               options={chatModelOptions}
               value={
-                settings.chatModel20231109 || DEFAULT_SETTINGS.chatModel20231109
+                settings.chatModel20240724 || DEFAULT_SETTINGS.chatModel20240724
               }
               variant="border"
               style={{

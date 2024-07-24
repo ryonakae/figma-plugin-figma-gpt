@@ -68,7 +68,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
 
   function onModelChange(event: JSX.TargetedEvent<HTMLInputElement>) {
     const model = event.currentTarget.value
-    updateSettings({ codeModel20231109: model })
+    updateSettings({ codeModel20240724: model })
     updateMaxTokens({ type: 'code', model: model })
   }
 
@@ -79,7 +79,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
   function updateTokens(prompt: string) {
     // const tokens = getTokensFromString(
     //   prompt,
-    //   settings.codeModel20231109 as TiktokenModel
+    //   settings.codeModel20240724 as TiktokenModel
     // )
     const tokens = getTokensFromString(prompt, 'gpt-3.5-turbo')
     setTokens(tokens.length)
@@ -181,7 +181,7 @@ export default function CodePrompt({ editor, error }: CodePromptProps) {
             onChange={onModelChange}
             options={codeModelOptions}
             value={
-              settings.codeModel20231109 || DEFAULT_SETTINGS.codeModel20231109
+              settings.codeModel20240724 || DEFAULT_SETTINGS.codeModel20240724
             }
             variant="border"
             style={{

@@ -67,7 +67,7 @@ export default function useCompletion() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.chatModel20231109,
+        model: settings.chatModel20240724,
         messages: messages,
         temperature: settings.temperature,
         max_tokens: settings.chatMaxTokens,
@@ -143,7 +143,7 @@ export default function useCompletion() {
             updateSettings({
               chatTotalTokens: getTokensFromChatMessages(
                 useStore.getState().chatMessages,
-                settings.chatModel20231109 as TiktokenModel
+                settings.chatModel20240724 as TiktokenModel
               ).length,
             })
 
@@ -179,7 +179,7 @@ export default function useCompletion() {
             updateSettings({
               chatTotalTokens: getTokensFromChatMessages(
                 useStore.getState().chatMessages,
-                settings.chatModel20231109 as TiktokenModel
+                settings.chatModel20240724 as TiktokenModel
               ).length,
             })
           })
@@ -207,7 +207,7 @@ export default function useCompletion() {
         Authorization: `Bearer ${settings.apiKey}`,
       },
       body: JSON.stringify({
-        model: settings.codeModel20231109,
+        model: settings.codeModel20240724,
         prompt: prompt,
         temperature: settings.temperature,
         max_tokens: settings.codeMaxTokens,

@@ -67,7 +67,7 @@ export default function Setting() {
   ) {
     const tokens = getTokensFromString(
       event.currentTarget.value,
-      settings.chatModel20231109 as TiktokenModel
+      settings.chatModel20240724 as TiktokenModel
     )
     updateSettings({
       chatSystemMessage: event.currentTarget.value,
@@ -104,8 +104,8 @@ export default function Setting() {
   }
 
   useMount(() => {
-    updateMaxTokens({ type: 'chat', model: settings.chatModel20231109 })
-    updateMaxTokens({ type: 'code', model: settings.codeModel20231109 })
+    updateMaxTokens({ type: 'chat', model: settings.chatModel20240724 })
+    updateMaxTokens({ type: 'code', model: settings.codeModel20240724 })
   })
 
   return (
@@ -122,10 +122,7 @@ export default function Setting() {
           <Muted>OpenAI API key</Muted>
         </Text>
         <Text>
-          <Link
-            href="https://platform.openai.com/account/api-keys"
-            target="_blank"
-          >
+          <Link href="https://platform.openai.com/api-keys" target="_blank">
             Get API key
           </Link>
         </Text>
@@ -191,7 +188,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.chatModel20231109)}
+        maximum={getMaxTokens(settings.chatModel20240724)}
         minimum={0}
         value={String(settings.chatMaxTokens)}
         onChange={onChatMaxTokensChange}
@@ -211,7 +208,7 @@ export default function Setting() {
       </div>
       <RangeSlider
         increment={1}
-        maximum={getMaxTokens(settings.codeModel20231109)}
+        maximum={getMaxTokens(settings.codeModel20240724)}
         minimum={0}
         value={String(settings.codeMaxTokens)}
         onChange={onCodeMaxTokensChange}

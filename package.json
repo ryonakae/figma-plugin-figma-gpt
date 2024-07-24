@@ -8,7 +8,7 @@
     "@emotion/react": "^11.10.6",
     "@monaco-editor/react": "^4.4.6",
     "highlight.js": "^11.7.0",
-    "js-tiktoken": "^1.0.7",
+    "js-tiktoken": "^1.0.12",
     "monaco-editor": "^0.36.1",
     "preact": ">=10",
     "react": "^18.2.0",
@@ -23,7 +23,7 @@
   "devDependencies": {
     "@create-figma-plugin/build": "^2.2.0",
     "@create-figma-plugin/tsconfig": "^2.2.0",
-    "@figma/plugin-typings": "1.57.1",
+    "@figma/plugin-typings": "^1.97.0",
     "@types/lodash": "^4.14.191",
     "@types/react-scroll-to-bottom": "^4.2.0",
     "@types/react-syntax-highlighter": "^15.5.6",

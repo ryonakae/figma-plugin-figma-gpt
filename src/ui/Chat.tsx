@@ -146,7 +146,7 @@ export default function Chat() {
                   </Text>
                   <Text>
                     <Link
-                      href="https://platform.openai.com/account/api-keys"
+                      href="https://platform.openai.com/api-keys"
                       target="_blank"
                     >
                       Get API key

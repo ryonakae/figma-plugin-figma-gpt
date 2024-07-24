@@ -20,7 +20,7 @@ export const DEFAULT_SETTINGS: Settings = {
   stop: '',
 
   // chat
-  chatModel20231109: 'gpt-3.5-turbo',
+  chatModel20240724: 'gpt-4o',
   chatMaxTokens: 1024,
   chatPrompt: '',
   chatMessages: [],
@@ -29,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   chatSystemMessageTokens: 0,
 
   // code
-  codeModel20231109: 'gpt-3.5-turbo-instruct',
+  codeModel20240724: 'gpt-3.5-turbo-instruct',
   codeMaxTokens: 1024,
   codePrompt: '',
   codeTotalTokens: 0,
@@ -67,10 +67,11 @@ export const CODE_EDITOR_DEFAULT_OPTIONS: monaco.editor.IStandaloneEditorConstru
 export const CODE_EDITOR_CDN_URL = 'https://wonderful-newton-c6b380.netlify.app'
 
 export const CHAT_MODELS: Model[] = [
+  { model: 'gpt-4o', maxTokens: 128000 },
+  { model: 'gpt-4o-mini', maxTokens: 128000 },
+  { model: 'gpt-4-turbo', maxTokens: 128000 },
   { model: 'gpt-4', maxTokens: 8192 },
-  { model: 'gpt-4-32k', maxTokens: 32768 },
-  { model: 'gpt-3.5-turbo', maxTokens: 4096 },
-  { model: 'gpt-3.5-turbo-16k', maxTokens: 16385 },
+  { model: 'gpt-3.5-turbo', maxTokens: 16385 },
 ]
 
 export const CODE_MODELS: Model[] = [
